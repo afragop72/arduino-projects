@@ -56,7 +56,7 @@
 |---------|-----------|-------------------|--------------------------------|
 | 1       | VSS       | Arduino GND       | Ground                         |
 | 2       | VDD       | Arduino 5V        | Power supply                   |
-| 3       | VO        | Pot middle pin    | Contrast adjustment            |
+| 3       | VO        | Pot middle pin (or see alternatives) | Contrast adjustment |
 | 4       | RS        | Arduino Pin 12    | Register Select                |
 | 5       | RW        | Arduino GND       | Read/Write (always write)      |
 | 6       | E         | Arduino Pin 11    | Enable signal                  |
@@ -78,6 +78,41 @@
 | Pin 1 (outer) | Arduino 5V    | High voltage reference     |
 | Pin 2 (middle)| LCD Pin 3 (VO)| Variable voltage output    |
 | Pin 3 (outer) | Arduino GND   | Low voltage reference      |
+
+### No Potentiometer? Alternative Connections for LCD Pin 3 (VO)
+
+If you don't have a potentiometer, use one of these alternatives:
+
+**Option 1: Direct to Ground (Simplest)**
+```
+LCD Pin 3 (VO) → Arduino GND
+```
+- Maximum contrast
+- Works for most LCDs
+- Start with this option
+
+**Option 2: Fixed Resistor Voltage Divider**
+```
+Arduino 5V → 1kΩ resistor → LCD Pin 3 (VO) → 10kΩ resistor → Arduino GND
+```
+- Creates ~0.45V at VO
+- Better contrast control
+- Requires two resistors
+
+**Option 3: Direct to 3.3V**
+```
+LCD Pin 3 (VO) → Arduino 3.3V pin
+```
+- Works with some LCDs
+- Easy to try if GND is too dark
+
+**Option 4: Leave Floating**
+```
+LCD Pin 3 (VO) → Not connected
+```
+- Not recommended
+- Unpredictable results
+- Last resort only
 
 ## Breadboard Layout Guide
 

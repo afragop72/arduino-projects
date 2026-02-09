@@ -6,7 +6,7 @@ Displays your full name on a 16x2 HD44780 parallel LCD using Arduino Uno R3.
 
 - Arduino Uno R3
 - 16x2 LCD with HD44780 controller (white on blue)
-- 10kΩ potentiometer (for contrast adjustment)
+- 10kΩ potentiometer (for contrast adjustment) - *Optional, see alternatives below*
 - 220Ω resistor (for backlight)
 - Breadboard and jumper wires
 
@@ -37,6 +37,34 @@ Displays your full name on a 16x2 HD44780 parallel LCD using Arduino Uno R3.
 - One outer pin → 5V
 - Other outer pin → GND
 - Middle pin → LCD Pin 3 (VO)
+
+### Don't Have a Potentiometer? No Problem!
+
+If you don't have a potentiometer, use one of these alternatives for LCD Pin 3 (VO):
+
+**Option 1: Direct to Ground (Recommended)**
+- Connect VO (Pin 3) directly to GND
+- Provides maximum contrast
+- Works for most HD44780 LCDs
+- Simplest solution
+
+**Option 2: Fixed Resistor Voltage Divider**
+- 1kΩ resistor: 5V → VO (Pin 3)
+- 10kΩ resistor: VO (Pin 3) → GND
+- Creates ~0.45V for better contrast control
+- Requires two resistors
+
+**Option 3: 3.3V Connection**
+- Connect VO (Pin 3) directly to Arduino 3.3V pin
+- Works with some LCDs
+- Easy to try if direct GND is too dark
+
+**Option 4: Leave Floating (Not Recommended)**
+- Leave VO unconnected
+- May work but contrast is unpredictable
+- Try only if other options fail
+
+**Recommendation:** Start with Option 1 (direct to GND). If the text is too dark or invisible, try Option 3 (3.3V).
 
 ## Installation
 
