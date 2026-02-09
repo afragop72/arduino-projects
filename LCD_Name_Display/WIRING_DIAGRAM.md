@@ -52,24 +52,26 @@
 
 ### LCD to Arduino
 
-| LCD Pin | Function  | Connection         | Notes                          |
-|---------|-----------|-------------------|--------------------------------|
-| 1       | VSS       | Arduino GND       | Ground                         |
-| 2       | VDD       | Arduino 5V        | Power supply                   |
-| 3       | VO        | Pot middle pin (or see alternatives) | Contrast adjustment |
-| 4       | RS        | Arduino Pin 12    | Register Select                |
-| 5       | RW        | Arduino GND       | Read/Write (always write)      |
-| 6       | E         | Arduino Pin 11    | Enable signal                  |
-| 7       | D0        | Not connected     | Data bit 0 (4-bit mode)        |
-| 8       | D1        | Not connected     | Data bit 1 (4-bit mode)        |
-| 9       | D2        | Not connected     | Data bit 2 (4-bit mode)        |
-| 10      | D3        | Not connected     | Data bit 3 (4-bit mode)        |
-| 11      | D4        | Arduino Pin 5     | Data bit 4                     |
-| 12      | D5        | Arduino Pin 4     | Data bit 5                     |
-| 13      | D6        | Arduino Pin 3     | Data bit 6                     |
-| 14      | D7        | Arduino Pin 2     | Data bit 7                     |
-| 15      | A (LED+)  | 5V via 220Ω resistor | Backlight positive          |
-| 16      | K (LED-)  | Arduino GND       | Backlight negative             |
+**Note:** Your LCD may have numbered pins (1-16) OR labeled pins (GND, VCC, etc.) - both are shown.
+
+| Pin # | PCB Label | Function  | Connection         | Notes                          |
+|-------|-----------|-----------|-------------------|--------------------------------|
+| 1     | GND       | Ground    | Arduino GND       | Ground                         |
+| 2     | VCC       | Power     | Arduino 5V        | Power supply                   |
+| 3     | V/O       | Contrast  | Arduino GND (or see alternatives) | Contrast adjustment |
+| 4     | RS        | Register  | Arduino Pin 12    | Register Select                |
+| 5     | RW        | R/W       | Arduino GND       | Read/Write (always write)      |
+| 6     | E         | Enable    | Arduino Pin 11    | Enable signal                  |
+| 7     | DB0       | Data 0    | Not connected     | Data bit 0 (4-bit mode)        |
+| 8     | DB1       | Data 1    | Not connected     | Data bit 1 (4-bit mode)        |
+| 9     | DB2       | Data 2    | Not connected     | Data bit 2 (4-bit mode)        |
+| 10    | DB3       | Data 3    | Not connected     | Data bit 3 (4-bit mode)        |
+| 11    | DB4       | Data 4    | Arduino Pin 5     | Data bit 4                     |
+| 12    | DB5       | Data 5    | Arduino Pin 4     | Data bit 5                     |
+| 13    | DB6       | Data 6    | Arduino Pin 3     | Data bit 6                     |
+| 14    | DB7       | Data 7    | Arduino Pin 2     | Data bit 7                     |
+| 15    | LED       | LED+      | 5V via 220Ω resistor | Backlight positive          |
+| 16    | LED       | LED-      | Arduino GND       | Backlight negative             |
 
 ### Potentiometer Connections (10kΩ)
 
@@ -85,7 +87,7 @@ If you don't have a potentiometer, use one of these alternatives:
 
 **Option 1: Direct to Ground (Simplest)**
 ```
-LCD Pin 3 (VO) → Arduino GND
+LCD Pin 3 (V/O) → Arduino GND
 ```
 - Maximum contrast
 - Works for most LCDs
@@ -93,7 +95,7 @@ LCD Pin 3 (VO) → Arduino GND
 
 **Option 2: Fixed Resistor Voltage Divider**
 ```
-Arduino 5V → 1kΩ resistor → LCD Pin 3 (VO) → 10kΩ resistor → Arduino GND
+Arduino 5V → 1kΩ resistor → LCD Pin 3 (V/O) → 10kΩ resistor → Arduino GND
 ```
 - Creates ~0.45V at VO
 - Better contrast control
@@ -101,14 +103,14 @@ Arduino 5V → 1kΩ resistor → LCD Pin 3 (VO) → 10kΩ resistor → Arduino G
 
 **Option 3: Direct to 3.3V**
 ```
-LCD Pin 3 (VO) → Arduino 3.3V pin
+LCD Pin 3 (V/O) → Arduino 3.3V pin
 ```
 - Works with some LCDs
 - Easy to try if GND is too dark
 
 **Option 4: Leave Floating**
 ```
-LCD Pin 3 (VO) → Not connected
+LCD Pin 3 (V/O) → Not connected
 ```
 - Not recommended
 - Unpredictable results

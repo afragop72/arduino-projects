@@ -14,53 +14,55 @@ Displays your full name on a 16x2 HD44780 parallel LCD using Arduino Uno R3.
 
 **Arduino Uno R3 → LCD Pin Connections:**
 
-| LCD Pin | Pin Name | Connection |
-|---------|----------|------------|
-| 1 | VSS | GND |
-| 2 | VDD | 5V |
-| 3 | VO | Potentiometer middle pin (contrast) |
-| 4 | RS | Digital Pin 12 |
-| 5 | RW | GND |
-| 6 | E | Digital Pin 11 |
-| 7 | D0 | Not connected |
-| 8 | D1 | Not connected |
-| 9 | D2 | Not connected |
-| 10 | D3 | Not connected |
-| 11 | D4 | Digital Pin 5 |
-| 12 | D5 | Digital Pin 4 |
-| 13 | D6 | Digital Pin 3 |
-| 14 | D7 | Digital Pin 2 |
-| 15 | A (LED+) | 5V through 220Ω resistor |
-| 16 | K (LED-) | GND |
+*Note: Your LCD may have numbered pins (1-16) OR labeled pins (GND, VCC, etc.). Both are shown below.*
 
-**Potentiometer Connections:**
-- One outer pin → 5V
-- Other outer pin → GND
-- Middle pin → LCD Pin 3 (VO)
+| Pin # | Label on PCB | Function | Connection |
+|-------|--------------|----------|------------|
+| 1 | GND | Ground | Arduino GND |
+| 2 | VCC | Power | Arduino 5V |
+| 3 | V/O | Contrast | GND (or see alternatives below) |
+| 4 | RS | Register Select | Arduino Digital Pin 12 |
+| 5 | RW | Read/Write | Arduino GND |
+| 6 | E | Enable | Arduino Digital Pin 11 |
+| 7 | DB0 | Data 0 | Not connected (4-bit mode) |
+| 8 | DB1 | Data 1 | Not connected (4-bit mode) |
+| 9 | DB2 | Data 2 | Not connected (4-bit mode) |
+| 10 | DB3 | Data 3 | Not connected (4-bit mode) |
+| 11 | DB4 | Data 4 | Arduino Digital Pin 5 |
+| 12 | DB5 | Data 5 | Arduino Digital Pin 4 |
+| 13 | DB6 | Data 6 | Arduino Digital Pin 3 |
+| 14 | DB7 | Data 7 | Arduino Digital Pin 2 |
+| 15 | LED (left) | Backlight + | 5V through 220Ω resistor |
+| 16 | LED (right) | Backlight - | Arduino GND |
+
+**Potentiometer Connections (if you have one):**
+- One outer pin → Arduino 5V
+- Other outer pin → Arduino GND
+- Middle pin → LCD Pin 3 (V/O)
 
 ### Don't Have a Potentiometer? No Problem!
 
-If you don't have a potentiometer, use one of these alternatives for LCD Pin 3 (VO):
+If you don't have a potentiometer, use one of these alternatives for LCD Pin 3 (V/O):
 
 **Option 1: Direct to Ground (Recommended)**
-- Connect VO (Pin 3) directly to GND
+- Connect V/O (Pin 3) directly to Arduino GND
 - Provides maximum contrast
 - Works for most HD44780 LCDs
 - Simplest solution
 
 **Option 2: Fixed Resistor Voltage Divider**
-- 1kΩ resistor: 5V → VO (Pin 3)
-- 10kΩ resistor: VO (Pin 3) → GND
+- 1kΩ resistor: 5V → V/O (Pin 3)
+- 10kΩ resistor: V/O (Pin 3) → GND
 - Creates ~0.45V for better contrast control
 - Requires two resistors
 
 **Option 3: 3.3V Connection**
-- Connect VO (Pin 3) directly to Arduino 3.3V pin
+- Connect V/O (Pin 3) directly to Arduino 3.3V pin
 - Works with some LCDs
 - Easy to try if direct GND is too dark
 
 **Option 4: Leave Floating (Not Recommended)**
-- Leave VO unconnected
+- Leave V/O unconnected
 - May work but contrast is unpredictable
 - Try only if other options fail
 
