@@ -4,8 +4,11 @@
  * Board: Arduino Uno R3
  *
  * Potentiometers:
- *   - 10kΩ on LCD Pin 3 (V/O) for contrast  (hardware only, no code)
- *   - 10kΩ on A1 for brightness              (read by code, drives PWM)
+ *   - 10kΩ on LCD Pin 3 (V/O) for contrast     (hardware only, no code)
+ *   - 10kΩ on A1 for scroll speed               (read by code, adjusts delay)
+ *
+ * Backlight:
+ *   - LCD Pin 15 (A) → 220Ω → 5V               (always on)
  *
  * LEDs:
  *   - 3 LEDs on pins 7, 8, 9 cycle in a chase pattern with each scroll step
@@ -18,9 +21,8 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 const int LCD_COLS = 16;
 
-// Brightness control
-const int BRIGHTNESS_PIN = 6;   // PWM output to LCD backlight (via 220Ω)
-const int BRIGHTNESS_POT = A1;  // Analog input from brightness potentiometer
+// Scroll speed control
+const int SPEED_POT = A1;  // Analog input from speed potentiometer
 
 // LED chase pins
 const int LED_PINS[] = {7, 8, 9};
@@ -37,10 +39,6 @@ void setup() {
   lcd.begin(LCD_COLS, 2);
   lcd.clear();
 
-  // Set up brightness control (start at full brightness)
-  pinMode(BRIGHTNESS_PIN, OUTPUT);
-  analogWrite(BRIGHTNESS_PIN, 255);
-
   // Set up LED pins
   for (int i = 0; i < NUM_LEDS; i++) {
     pinMode(LED_PINS[i], OUTPUT);
@@ -54,9 +52,9 @@ void setup() {
 }
 
 void loop() {
-  // Read brightness pot and set backlight
-  int brightness = analogRead(BRIGHTNESS_POT);
-  analogWrite(BRIGHTNESS_PIN, map(brightness, 0, 1023, 0, 255));
+  // Read speed pot: 0 = fast (100ms), 1023 = slow (500ms)
+  int speedVal = analogRead(SPEED_POT);
+  int scrollDelay = map(speedVal, 0, 1023, 100, 500);
 
   // Scroll text
   lcd.setCursor(0, 0);
@@ -75,7 +73,7 @@ void loop() {
     scrollPos = 0;
   }
 
-  delay(300);  // Scroll speed in ms (lower = faster)
+  delay(scrollDelay);
 }
 
 // Prints a scrolling window of 16 characters from the message.
