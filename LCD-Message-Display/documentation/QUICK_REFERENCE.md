@@ -12,31 +12,31 @@ GND → VCC → V/O → RS → RW → E → DB0 → DB1 → DB2 → DB3 → DB4 
 
 ## LCD Wiring Table
 
-| LCD Label      | Arduino Connection        | Notes                         |
-| -------------- | ------------------------- | ----------------------------- |
-| **GND**        | GND                       | Ground                        |
-| **VCC**        | 5V                        | Power                         |
-| **V/O**        | Contrast pot wiper         | Pot between 5V and GND        |
-| **RS**         | Pin 12                    | Register Select               |
-| **RW**         | GND                       | Read/Write (always GND)       |
-| **E**          | Pin 11                    | Enable                        |
-| **DB0**        | --                        | Not connected                 |
-| **DB1**        | --                        | Not connected                 |
-| **DB2**        | --                        | Not connected                 |
-| **DB3**        | --                        | Not connected                 |
-| **DB4**        | Pin 5                     | Data                          |
-| **DB5**        | Pin 4                     | Data                          |
-| **DB6**        | Pin 3                     | Data                          |
-| **DB7**        | Pin 2                     | Data                          |
-| **LED** (left) | Pin 6 via 220Ω            | Backlight + (PWM brightness)  |
-| **LED** (right)| GND                       | Backlight -                   |
+| LCD Label       | Arduino Connection         | Notes                         |
+| --------------- | -------------------------- | ----------------------------- |
+| **GND**         | GND                        | Ground                        |
+| **VCC**         | 5V                         | Power                         |
+| **V/O**         | Contrast pot wiper          | Pot between 5V and GND        |
+| **RS**          | Pin 12                     | Register Select               |
+| **RW**          | GND                        | Read/Write (always GND)       |
+| **E**           | Pin 11                     | Enable                        |
+| **DB0**         | --                         | Not connected                 |
+| **DB1**         | --                         | Not connected                 |
+| **DB2**         | --                         | Not connected                 |
+| **DB3**         | --                         | Not connected                 |
+| **DB4**         | Pin 5                      | Data                          |
+| **DB5**         | Pin 4                      | Data                          |
+| **DB6**         | Pin 3                      | Data                          |
+| **DB7**         | Pin 2                      | Data                          |
+| **LED** (left)  | 5V via 220Ω                | Backlight + (always on)       |
+| **LED** (right) | GND                        | Backlight -                   |
 
 ## Potentiometer Connections
 
-| Pot            | Terminal 1 | Wiper (middle) | Terminal 2 |
-| -------------- | ---------- | -------------- | ---------- |
-| Contrast       | 5V         | LCD V/O        | GND        |
-| Brightness     | 5V         | Arduino A1     | GND        |
+| Pot          | Terminal 1 | Wiper (middle) | Terminal 2 |
+| ------------ | ---------- | -------------- | ---------- |
+| Contrast     | 5V         | LCD V/O        | GND        |
+| Scroll Speed | 5V         | Arduino A1     | GND        |
 
 ## LED Chase Connections
 
@@ -58,7 +58,7 @@ GND → VCC → V/O → RS → RW → E → DB0 → DB1 → DB2 → DB3 → DB4 
 - Pot outer pins → 5V and GND
 - Pot wiper → LCD V/O
 
-**3. Brightness pot:**
+**3. Scroll speed pot:**
 
 - Pot outer pins → 5V and GND
 - Pot wiper → Arduino A1
@@ -79,7 +79,7 @@ GND → VCC → V/O → RS → RW → E → DB0 → DB1 → DB2 → DB3 → DB4 
 
 **6. Backlight:**
 
-- LED (left) → 220Ω resistor → Arduino Pin 6
+- LED (left) → 220Ω resistor → 5V
 - LED (right) → Arduino GND
 
 **7. Chase LEDs:**
@@ -96,9 +96,8 @@ Make sure your Arduino code matches:
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 //               RS  E  D4 D5 D6 D7
 
-const int BRIGHTNESS_PIN = 6;   // PWM backlight
-const int BRIGHTNESS_POT = A1;  // Brightness pot input
-const int LED_PINS[] = {7, 8, 9}; // Chase LEDs
+const int SPEED_POT = A1;            // Scroll speed pot input
+const int LED_PINS[] = {7, 8, 9};    // Chase LEDs
 ```
 
 ## Important Notes
@@ -106,5 +105,5 @@ const int LED_PINS[] = {7, 8, 9}; // Chase LEDs
 - **RW must be grounded** - This puts LCD in write mode
 - **DB0-DB3 stay disconnected** - We're using 4-bit mode to save Arduino pins
 - **220Ω resistors are required** - One for backlight, one per LED
-- **Backlight goes to Pin 6, not 5V** - This allows software brightness control
-- **Brightness pot wiper goes to A1** - The code reads this to set PWM duty cycle
+- **Backlight goes to 5V** (through 220Ω) - Always on
+- **Scroll speed pot wiper goes to A1** - The code reads this to set scroll delay

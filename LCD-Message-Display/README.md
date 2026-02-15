@@ -1,6 +1,6 @@
 # LCD Name Display
 
-Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with adjustable contrast, adjustable brightness, and LED chase lights.
+Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with adjustable contrast, adjustable scroll speed, and LED chase lights.
 
 ![Arduino](https://img.shields.io/badge/Arduino-Uno%20R3-00979D?logo=arduino&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Ready-success)
@@ -8,13 +8,13 @@ Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with adjustable co
 
 ## Overview
 
-This project demonstrates how to interface a 16x2 character LCD (HD44780 controller) with an Arduino Uno R3 to display scrolling custom text. It includes two potentiometers (contrast and brightness) and three LEDs that chase in sequence with the scrolling text.
+This project demonstrates how to interface a 16x2 character LCD (HD44780 controller) with an Arduino Uno R3 to display scrolling custom text. It includes two potentiometers (contrast and scroll speed) and three LEDs that chase in sequence with the scrolling text.
 
 **Features:**
 - Scrolling text across both LCD lines
 - 4-bit mode connection (saves Arduino pins)
 - Potentiometer for contrast control (hardware)
-- Potentiometer for brightness control (software PWM)
+- Potentiometer for scroll speed control (software)
 - 3 LEDs that cycle in a chase pattern with each scroll step
 - Includes TinkerCad simulation guide
 - Complete wiring diagrams and troubleshooting
@@ -25,7 +25,7 @@ This project demonstrates how to interface a 16x2 character LCD (HD44780 control
 
 - Arduino Uno R3
 - 16x2 LCD with HD44780 controller (white on blue backlight)
-- 10kΩ potentiometer x2 (contrast + brightness)
+- 10kΩ potentiometer x2 (contrast + scroll speed)
 - 220Ω resistor x4 (1 for backlight, 3 for LEDs)
 - LED x3 (red, yellow, green)
 - Breadboard (full-size recommended) and jumper wires
@@ -53,17 +53,17 @@ Connect your LCD to the Arduino following this pinout:
 | 12      | DB5   | Pin 4       |
 | 13      | DB6   | Pin 3       |
 | 14      | DB7   | Pin 2       |
-| 15      | LED+  | Pin 6 via 220Ω (PWM) |
+| 15      | LED+  | 5V via 220Ω |
 | 16      | LED-  | GND         |
 
 *Note: Pins 7-10 (DB0-DB3) are not connected in 4-bit mode.*
 
 ### 2. Wire the Potentiometers
 
-| Pot        | Terminal 1 | Wiper (middle) | Terminal 2 |
-| ---------- | ---------- | -------------- | ---------- |
-| Contrast   | 5V         | LCD V/O        | GND        |
-| Brightness | 5V         | Arduino A1     | GND        |
+| Pot          | Terminal 1 | Wiper (middle) | Terminal 2 |
+| ------------ | ---------- | -------------- | ---------- |
+| Contrast     | 5V         | LCD V/O        | GND        |
+| Scroll Speed | 5V         | Arduino A1     | GND        |
 
 ### 3. Wire the LEDs
 
@@ -78,7 +78,7 @@ Each LED connects through a 220Ω resistor:
 ### 4. Upload the Code
 
 1. Open `LCD_Name_Display.ino` in Arduino IDE
-2. Edit lines 31-32 to customise the scrolling messages
+2. Edit lines 32-33 to customise the scrolling messages
 3. Select **Tools > Board > Arduino Uno**
 4. Select your COM port under **Tools > Port**
 5. Click **Upload** (or press Ctrl+U)
@@ -86,7 +86,7 @@ Each LED connects through a 220Ω resistor:
 ### 5. Adjust Controls
 
 - **Contrast pot**: Turn until text is clearly visible on the LCD
-- **Brightness pot**: Turn to dim or brighten the LCD backlight
+- **Scroll speed pot**: Turn to speed up or slow down scrolling and LED chase
 - **LEDs**: They chase automatically in sync with scrolling text
 
 ## Documentation
@@ -111,8 +111,7 @@ Try your circuit in [TinkerCad](https://www.tinkercad.com) first! See the [Tinke
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 const int LCD_COLS = 16;
-const int BRIGHTNESS_PIN = 6;
-const int BRIGHTNESS_POT = A1;
+const int SPEED_POT = A1;
 const int LED_PINS[] = {7, 8, 9};
 const int NUM_LEDS = 3;
 
@@ -125,7 +124,6 @@ int maxLen;
 void setup() {
   lcd.begin(LCD_COLS, 2);
   lcd.clear();
-  pinMode(BRIGHTNESS_PIN, OUTPUT);
   for (int i = 0; i < NUM_LEDS; i++) {
     pinMode(LED_PINS[i], OUTPUT);
     digitalWrite(LED_PINS[i], LOW);
@@ -134,8 +132,8 @@ void setup() {
 }
 
 void loop() {
-  int brightness = analogRead(BRIGHTNESS_POT);
-  analogWrite(BRIGHTNESS_PIN, map(brightness, 0, 1023, 0, 255));
+  int speedVal = analogRead(SPEED_POT);
+  int scrollDelay = map(speedVal, 0, 1023, 100, 500);
 
   lcd.setCursor(0, 0);
   printScrolled(line1, scrollPos);
@@ -148,7 +146,7 @@ void loop() {
 
   scrollPos++;
   if (scrollPos > maxLen) scrollPos = 0;
-  delay(300);
+  delay(scrollDelay);
 }
 
 void printScrolled(const char* msg, int offset) {
@@ -167,7 +165,6 @@ void printScrolled(const char* msg, int offset) {
 | ----------- | ---------------------- |
 | Pin 12      | LCD RS                 |
 | Pin 11      | LCD E                  |
-| Pin 6       | LCD backlight (PWM)    |
 | Pin 5       | LCD DB4                |
 | Pin 4       | LCD DB5                |
 | Pin 3       | LCD DB6                |
@@ -175,7 +172,7 @@ void printScrolled(const char* msg, int offset) {
 | Pin 7       | LED 1 (red)            |
 | Pin 8       | LED 2 (yellow)         |
 | Pin 9       | LED 3 (green)          |
-| A1          | Brightness pot input   |
+| A1          | Scroll speed pot input |
 
 ## Troubleshooting
 
@@ -184,7 +181,7 @@ void printScrolled(const char* msg, int offset) {
 | **No text visible** | Adjust contrast pot; check power connections |
 | **Gibberish characters** | Check data pins DB4-DB7 (pins 11-14) to Arduino pins 5, 4, 3, 2 |
 | **Nothing on screen** | Verify VCC to 5V, GND to GND |
-| **Backlight not responding** | Verify LCD Pin 15 goes through 220Ω to Arduino Pin 6 (not 5V) |
+| **Backlight not working** | Verify LCD Pin 15 goes through 220Ω to 5V rail |
 | **LEDs not lighting** | Check 220Ω resistors and LED polarity (longer leg = anode) |
 | **Upload error** | Check board selection and COM port |
 

@@ -12,7 +12,7 @@
 
 3. **10kΩ Potentiometer** (2x)
    - Pot 1: LCD contrast adjustment (hardware)
-   - Pot 2: LCD brightness control (read by Arduino on A1)
+   - Pot 2: Scroll speed control (read by Arduino on A1)
 
 4. **220Ω Resistor** (4x)
    - 1 for LCD backlight current limiting

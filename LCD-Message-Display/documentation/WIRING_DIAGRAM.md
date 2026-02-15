@@ -17,8 +17,6 @@
                     │          │     │      │               │                 │
                     │   Pin 11 ├─────┼──────┼───────────────┤ 6 (E)           │
                     │          │     │      │               │                 │
-                    │    Pin 6 ├──[220Ω]────┼───────────────┤ 15 (A/LED+)     │
-                    │          │     │      │               │                 │
                     │    Pin 5 ├─────┼──────┼───────────────┤ 11 (D4)         │
                     │          │     │      │               │                 │
                     │    Pin 4 ├─────┼──────┼───────────────┤ 12 (D5)         │
@@ -29,33 +27,32 @@
                     │          │     │      │               │                 │
                     │    Pin 7 ├──[220Ω]──LED1 (red)        │ 3 (VO) ─────┐   │
                     │          │     │      │               │             │   │
-                    │    Pin 8 ├──[220Ω]──LED2 (yellow)     │ 7-10 (D0-D3)   │
-                    │          │     │      │               │ Not         │   │
-                    │    Pin 9 ├──[220Ω]──LED3 (green)      │ Connected   │   │
-                    │          │     │      │               │             │   │
-                    │       A1 ├─────┼──────┼──┐            │             │   │
-                    │          │     │      │  │            │             │   │
-                    └──────────┘     │      │  │            │ 16 (K/LED-) │   │
-                                     │      │  │            └──────┬──────┘   │
-                                     │      │  │                   │          │
-                    Pot 1 (Contrast)─┼──────┼──┼───────────────────┼──────────┘
-                    (hardware only)  │      │  │                   │
-                         ┌─────┐     │      │  │                   │
-                    5V ──┤  o  ├─────┘      │  │                   │
-                         │  │  │            │  │                   │
-                     VO ─┤  o  ├────────────┼──┼───── LCD Pin 3    │
-                         │  │  │            │  │                   │
+                    │    Pin 8 ├──[220Ω]──LED2 (yellow)     │ 15 (A/LED+)│   │
+                    │          │     │      │               │      │      │   │
+                    │    Pin 9 ├──[220Ω]──LED3 (green)      │   ┌──┴──┐   │   │
+                    │          │     │      │               │   │ 220Ω│   │   │
+                    │       A1 ├─────┼──────┼──┐            │   └──┬──┘   │   │
+                    │          │     │      │  │            │      │      │   │
+                    └──────────┘     │      │  │            │  5V ─┘      │   │
+                                     │      │  │            │             │   │
+                    Pot 1 (Contrast)─┼──────┼──┼────────────│─────────────┘   │
+                    (hardware only)  │      │  │            │                 │
+                         ┌─────┐     │      │  │            │ 7-10 (D0-D3)   │
+                    5V ──┤  o  ├─────┘      │  │            │ Not Connected   │
+                         │  │  │            │  │            │                 │
+                     VO ─┤  o  ├────────────┼──┼──LCD Pin 3 │ 16 (K/LED-)    │
+                         │  │  │            │  │            └──────┬──────────┘
                     GND ─┤  o  ├────────────┘  │                   │
                          └─────┘               │                   │
-                                               │                   │
-                    Pot 2 (Brightness)         │                   │
-                    (software read on A1)      │                   │
-                         ┌─────┐               │                   │
-                    5V ──┤  o  ├───────────────┘                   │
-                         │  │  │                                   │
-                     A1 ─┤  o  ├── Arduino A1                      │
-                         │  │  │                                   │
-                    GND ─┤  o  ├───────────────────────────────────┘
+                                               │                GND rail
+                    Pot 2 (Scroll Speed)       │
+                    (software read on A1)      │
+                         ┌─────┐               │
+                    5V ──┤  o  ├───────────────┘
+                         │  │  │
+                     A1 ─┤  o  ├── Arduino A1
+                         │  │  │
+                    GND ─┤  o  ├── GND rail
                          └─────┘
 ```
 
@@ -81,7 +78,7 @@
 | 12    | DB5       | Data 5     | Arduino Pin 4                           | Data bit 5                     |
 | 13    | DB6       | Data 6     | Arduino Pin 3                           | Data bit 6                     |
 | 14    | DB7       | Data 7     | Arduino Pin 2                           | Data bit 7                     |
-| 15    | LED       | LED+       | Arduino Pin 6 via 220Ω resistor (PWM)   | Backlight positive             |
+| 15    | LED       | LED+       | 5V via 220Ω resistor                    | Backlight positive (always on) |
 | 16    | LED       | LED-       | Arduino GND                             | Backlight negative             |
 
 ### Contrast Potentiometer (Pot 1 - 10kΩ, hardware only)
@@ -92,7 +89,7 @@
 | Pin 2 (middle) | LCD Pin 3 (VO) | Variable voltage output    |
 | Pin 3 (outer)  | Arduino GND    | Low voltage reference      |
 
-### Brightness Potentiometer (Pot 2 - 10kΩ, software controlled)
+### Scroll Speed Potentiometer (Pot 2 - 10kΩ, software controlled)
 
 | Pot Pin        | Connection  | Purpose                             |
 | -------------- | ----------- | ----------------------------------- |
@@ -100,15 +97,15 @@
 | Pin 2 (middle) | Arduino A1  | Analog input read by code           |
 | Pin 3 (outer)  | Arduino GND | Low voltage reference               |
 
-The Arduino reads the voltage on A1 (0-1023) and maps it to a PWM value (0-255) on Pin 6 to control backlight brightness.
+The Arduino reads the voltage on A1 (0-1023) and maps it to a scroll delay (100ms–500ms), controlling how fast text scrolls and LEDs chase.
 
 ### LED Chase Lights
 
-| LED   | Arduino Pin | Resistor | Cathode |
-| ----- | ----------- | -------- | ------- |
-| LED 1 (red)    | Pin 7 | 220Ω | GND |
-| LED 2 (yellow) | Pin 8 | 220Ω | GND |
-| LED 3 (green)  | Pin 9 | 220Ω | GND |
+| LED            | Arduino Pin | Resistor | Cathode |
+| -------------- | ----------- | -------- | ------- |
+| LED 1 (red)    | Pin 7       | 220Ω     | GND     |
+| LED 2 (yellow) | Pin 8       | 220Ω     | GND     |
+| LED 3 (green)  | Pin 9       | 220Ω     | GND     |
 
 **Per LED:** Arduino Pin → 220Ω resistor → LED anode (+) → LED cathode (-) → GND rail
 
@@ -119,7 +116,7 @@ The Arduino reads the voltage on A1 (0-1023) and maps it to a PWM value (0-255) 
 1. **Place Arduino** on the left side of breadboard
 2. **Place LCD** on the right side (may need two breadboards)
 3. **Place Pot 1 (contrast)** near LCD Pin 3 for short wiring
-4. **Place Pot 2 (brightness)** near Arduino A1
+4. **Place Pot 2 (scroll speed)** near Arduino A1
 5. **Place LEDs** in a row near the Arduino for visibility
 6. **Power Rails**:
    - Connect Arduino 5V to breadboard + rail
@@ -137,7 +134,7 @@ Do connections in this order to avoid mistakes:
    - Pot 1 outer pins → 5V and GND rails
    - Pot 1 wiper → LCD Pin 3 (VO)
 
-3. **Brightness potentiometer**
+3. **Scroll speed potentiometer**
    - Pot 2 outer pins → 5V and GND rails
    - Pot 2 wiper → Arduino A1
 
@@ -152,8 +149,8 @@ Do connections in this order to avoid mistakes:
    - LCD Pin 13 (D6) → Arduino Pin 3
    - LCD Pin 14 (D7) → Arduino Pin 2
 
-6. **Backlight (PWM controlled)**
-   - LCD Pin 15 (A) → 220Ω resistor → Arduino Pin 6
+6. **Backlight (always on)**
+   - LCD Pin 15 (A) → 220Ω resistor → 5V rail
    - LCD Pin 16 (K) → GND rail
 
 7. **LEDs (last)**
@@ -179,17 +176,21 @@ Do connections in this order to avoid mistakes:
 - Double-check data pins D4-D7 (pins 11-14 on LCD)
 - Verify they go to Arduino pins 5, 4, 3, 2 respectively
 
-### Backlight not responding to brightness pot
+### Backlight not working
 
-- Verify LCD Pin 15 (A) connects through 220Ω to Arduino **Pin 6** (not 5V)
-- Verify the brightness pot wiper goes to **A1**
-- Verify LCD Pin 16 (K) is grounded
+- Verify LCD Pin 15 (A) connects through 220Ω to **5V** rail
+- Verify LCD Pin 16 (K) is connected to GND
 
 ### LEDs not chasing
 
 - Verify each LED has a 220Ω series resistor
 - Check LED polarity (longer leg = anode = positive)
 - Confirm pins 7, 8, 9 are wired correctly
+
+### Scroll speed pot has no effect
+
+- Verify pot wiper (middle pin) goes to Arduino **A1**
+- Ensure outer terminals go to 5V and GND
 
 ### Nothing happens when uploading code
 
@@ -202,7 +203,7 @@ Before starting, verify you have:
 
 - [ ] Arduino Uno R3
 - [ ] 16x2 LCD with HD44780 controller
-- [ ] 10kΩ potentiometer x2 (contrast + brightness)
+- [ ] 10kΩ potentiometer x2 (contrast + scroll speed)
 - [ ] 220Ω resistor x4 (1 for backlight, 3 for LEDs)
 - [ ] LED x3 (red, yellow, green)
 - [ ] Breadboard (full-size recommended)
