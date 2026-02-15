@@ -1,6 +1,6 @@
 # LCD Name Display
 
-Display your name on a 16x2 HD44780 LCD using Arduino Uno R3.
+Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with adjustable contrast, adjustable brightness, and LED chase lights.
 
 ![Arduino](https://img.shields.io/badge/Arduino-Uno%20R3-00979D?logo=arduino&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Ready-success)
@@ -8,25 +8,30 @@ Display your name on a 16x2 HD44780 LCD using Arduino Uno R3.
 
 ## Overview
 
-This project demonstrates how to interface a 16x2 character LCD (HD44780 controller) with an Arduino Uno R3 to display custom text. Perfect for beginners learning Arduino and LCD interfacing!
+This project demonstrates how to interface a 16x2 character LCD (HD44780 controller) with an Arduino Uno R3 to display scrolling custom text. It includes two potentiometers (contrast and brightness) and three LEDs that chase in sequence with the scrolling text.
 
 **Features:**
-- Simple 4-bit mode connection (saves Arduino pins)
-- Works with or without a potentiometer for contrast control
-- Supports both numbered and labeled LCD pins
+- Scrolling text across both LCD lines
+- 4-bit mode connection (saves Arduino pins)
+- Potentiometer for contrast control (hardware)
+- Potentiometer for brightness control (software PWM)
+- 3 LEDs that cycle in a chase pattern with each scroll step
 - Includes TinkerCad simulation guide
 - Complete wiring diagrams and troubleshooting
 
 ## What You'll Need
 
 ### Hardware
+
 - Arduino Uno R3
 - 16x2 LCD with HD44780 controller (white on blue backlight)
-- 220Ω resistor (for backlight)
-- Breadboard and jumper wires
-- **Optional:** 10kΩ potentiometer (for adjustable contrast)
+- 10kΩ potentiometer x2 (contrast + brightness)
+- 220Ω resistor x4 (1 for backlight, 3 for LEDs)
+- LED x3 (red, yellow, green)
+- Breadboard (full-size recommended) and jumper wires
 
 ### Software
+
 - [Arduino IDE](https://www.arduino.cc/en/software) (version 2.x recommended)
 - LiquidCrystal library (built-in, no installation needed)
 
@@ -36,62 +41,63 @@ This project demonstrates how to interface a 16x2 character LCD (HD44780 control
 
 Connect your LCD to the Arduino following this pinout:
 
-| LCD Pin | Label | Arduino |
-|---------|-------|---------|
-| 1 | GND | GND |
-| 2 | VCC | 5V |
-| 3 | V/O | GND (or 3.3V if too dark) |
-| 4 | RS | Pin 12 |
-| 5 | RW | GND |
-| 6 | E | Pin 11 |
-| 11 | DB4 | Pin 5 |
-| 12 | DB5 | Pin 4 |
-| 13 | DB6 | Pin 3 |
-| 14 | DB7 | Pin 2 |
-| 15 | LED+ | 5V (via 220Ω resistor) |
-| 16 | LED- | GND |
+| LCD Pin | Label | Arduino     |
+| ------- | ----- | ----------- |
+| 1       | GND   | GND         |
+| 2       | VCC   | 5V          |
+| 3       | V/O   | Contrast pot wiper |
+| 4       | RS    | Pin 12      |
+| 5       | RW    | GND         |
+| 6       | E     | Pin 11      |
+| 11      | DB4   | Pin 5       |
+| 12      | DB5   | Pin 4       |
+| 13      | DB6   | Pin 3       |
+| 14      | DB7   | Pin 2       |
+| 15      | LED+  | Pin 6 via 220Ω (PWM) |
+| 16      | LED-  | GND         |
 
 *Note: Pins 7-10 (DB0-DB3) are not connected in 4-bit mode.*
 
-**📖 For detailed wiring instructions, see [WIRING_DIAGRAM.md](documentation/WIRING_DIAGRAM.md)**
+### 2. Wire the Potentiometers
 
-### 2. Upload the Code
+| Pot        | Terminal 1 | Wiper (middle) | Terminal 2 |
+| ---------- | ---------- | -------------- | ---------- |
+| Contrast   | 5V         | LCD V/O        | GND        |
+| Brightness | 5V         | Arduino A1     | GND        |
+
+### 3. Wire the LEDs
+
+Each LED connects through a 220Ω resistor:
+
+| LED    | Arduino Pin | Resistor | Cathode |
+| ------ | ----------- | -------- | ------- |
+| Red    | Pin 7       | 220Ω     | GND     |
+| Yellow | Pin 8       | 220Ω     | GND     |
+| Green  | Pin 9       | 220Ω     | GND     |
+
+### 4. Upload the Code
 
 1. Open `LCD_Name_Display.ino` in Arduino IDE
-2. Edit line 19 to replace `"Your Full Name"` with your name (max 16 characters)
-3. Select **Tools → Board → Arduino Uno**
-4. Select your COM port under **Tools → Port**
+2. Edit lines 31-32 to customise the scrolling messages
+3. Select **Tools > Board > Arduino Uno**
+4. Select your COM port under **Tools > Port**
 5. Click **Upload** (or press Ctrl+U)
 
-### 3. Adjust Contrast
+### 5. Adjust Controls
 
-If you connected V/O (Pin 3) to GND and the text is too dark or invisible, try connecting it to the Arduino's 3.3V pin instead.
+- **Contrast pot**: Turn until text is clearly visible on the LCD
+- **Brightness pot**: Turn to dim or brighten the LCD backlight
+- **LEDs**: They chase automatically in sync with scrolling text
 
 ## Documentation
 
 | Document | Description |
-|----------|-------------|
-| [📖 Full Documentation](documentation/README.md) | Complete setup guide with troubleshooting |
-| [🔌 Wiring Diagram](documentation/WIRING_DIAGRAM.md) | Detailed pin-by-pin connections |
-| [⚡ Quick Reference](documentation/QUICK_REFERENCE.md) | Fast lookup for labeled LCD modules |
-| [🔧 Parts List](documentation/PARTS_LIST.md) | All components needed |
-| [💻 TinkerCad Guide](documentation/TINKERCAD_GUIDE.md) | Test your circuit in simulation first |
-
-## Key Features
-
-### No Potentiometer? No Problem!
-
-This project works perfectly **without** a potentiometer. Simply connect LCD Pin 3 (V/O) directly to GND for maximum contrast. If the text is too dark, connect to 3.3V instead.
-
-**See [documentation/README.md](documentation/README.md#dont-have-a-potentiometer-no-problem) for all contrast control options.**
-
-### Labeled vs Numbered LCD Pins
-
-Your LCD may have:
-- **Numbered pins:** 1, 2, 3, 4... 16
-- **Labeled pins:** GND, VCC, V/O, RS, RW, E, DB0-DB7, LED
-
-Both formats are supported! Check the [Quick Reference](documentation/QUICK_REFERENCE.md) for labeled pin mapping.
+| -------- | ----------- |
+| [Full Documentation](documentation/README.md) | Complete setup guide with troubleshooting |
+| [Wiring Diagram](documentation/WIRING_DIAGRAM.md) | Detailed pin-by-pin connections |
+| [Quick Reference](documentation/QUICK_REFERENCE.md) | Fast lookup for labeled LCD modules |
+| [Parts List](documentation/PARTS_LIST.md) | All components needed |
+| [TinkerCad Guide](documentation/TINKERCAD_GUIDE.md) | Test your circuit in simulation first |
 
 ## Test Before Building
 
@@ -102,33 +108,87 @@ Try your circuit in [TinkerCad](https://www.tinkercad.com) first! See the [Tinke
 ```cpp
 #include <LiquidCrystal.h>
 
-// Initialize LCD: RS, E, D4, D5, D6, D7
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
+const int LCD_COLS = 16;
+const int BRIGHTNESS_PIN = 6;
+const int BRIGHTNESS_POT = A1;
+const int LED_PINS[] = {7, 8, 9};
+const int NUM_LEDS = 3;
+
+const char* line1 = "Hello! My name is Andreas Fragkopoulos!";
+const char* line2 = "Coding with Arduino, rocks!";
+
+int scrollPos = 0;
+int maxLen;
+
 void setup() {
-  lcd.begin(16, 2);                // Initialize 16x2 LCD
-  lcd.setCursor(0, 0);             // First line, first position
-  lcd.print("Your Full Name");     // <- Edit this
-  lcd.setCursor(0, 1);             // Second line
-  lcd.print("Arduino Uno R3");
+  lcd.begin(LCD_COLS, 2);
+  lcd.clear();
+  pinMode(BRIGHTNESS_PIN, OUTPUT);
+  for (int i = 0; i < NUM_LEDS; i++) {
+    pinMode(LED_PINS[i], OUTPUT);
+    digitalWrite(LED_PINS[i], LOW);
+  }
+  maxLen = max(strlen(line1), strlen(line2));
 }
 
 void loop() {
-  // Display stays on screen
+  int brightness = analogRead(BRIGHTNESS_POT);
+  analogWrite(BRIGHTNESS_PIN, map(brightness, 0, 1023, 0, 255));
+
+  lcd.setCursor(0, 0);
+  printScrolled(line1, scrollPos);
+  lcd.setCursor(0, 1);
+  printScrolled(line2, scrollPos);
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    digitalWrite(LED_PINS[i], (i == scrollPos % NUM_LEDS) ? HIGH : LOW);
+  }
+
+  scrollPos++;
+  if (scrollPos > maxLen) scrollPos = 0;
+  delay(300);
+}
+
+void printScrolled(const char* msg, int offset) {
+  int len = strlen(msg);
+  for (int i = 0; i < LCD_COLS; i++) {
+    int idx = offset + i;
+    if (idx < len) lcd.write(msg[idx]);
+    else lcd.write(' ');
+  }
 }
 ```
+
+## Pin Summary
+
+| Arduino Pin | Purpose                |
+| ----------- | ---------------------- |
+| Pin 12      | LCD RS                 |
+| Pin 11      | LCD E                  |
+| Pin 6       | LCD backlight (PWM)    |
+| Pin 5       | LCD DB4                |
+| Pin 4       | LCD DB5                |
+| Pin 3       | LCD DB6                |
+| Pin 2       | LCD DB7                |
+| Pin 7       | LED 1 (red)            |
+| Pin 8       | LED 2 (yellow)         |
+| Pin 9       | LED 3 (green)          |
+| A1          | Brightness pot input   |
 
 ## Troubleshooting
 
 | Problem | Solution |
-|---------|----------|
-| **No text visible** | Adjust V/O connection: try GND or 3.3V |
-| **Gibberish characters** | Check data pins DB4-DB7 (pins 11-14) → Arduino pins 5,4,3,2 |
-| **Nothing on screen** | Verify power connections: VCC→5V, GND→GND |
+| ------- | -------- |
+| **No text visible** | Adjust contrast pot; check power connections |
+| **Gibberish characters** | Check data pins DB4-DB7 (pins 11-14) to Arduino pins 5, 4, 3, 2 |
+| **Nothing on screen** | Verify VCC to 5V, GND to GND |
+| **Backlight not responding** | Verify LCD Pin 15 goes through 220Ω to Arduino Pin 6 (not 5V) |
+| **LEDs not lighting** | Check 220Ω resistors and LED polarity (longer leg = anode) |
 | **Upload error** | Check board selection and COM port |
-| **Backlight not working** | Verify 220Ω resistor and LED pins |
 
-**📖 Full troubleshooting guide in [documentation/README.md](documentation/README.md#troubleshooting)**
+**Full troubleshooting guide in [documentation/README.md](documentation/README.md)**
 
 ## Project Structure
 
@@ -141,13 +201,16 @@ LCD_Name_Display/
     ├── WIRING_DIAGRAM.md        # Detailed wiring
     ├── QUICK_REFERENCE.md       # Labeled LCD pin guide
     ├── PARTS_LIST.md            # Components list
-    └── TINKERCAD_GUIDE.md       # Simulation guide
+    ├── TINKERCAD_GUIDE.md       # Simulation guide
+    └── designs/
+        ├── LCS-Display-Name-CAD.pdf
+        └── connections-view.png
 ```
 
 ## Next Steps
 
 Once you've got this working, try:
-- Add a scrolling message with `lcd.scrollDisplayLeft()`
+- Change the LED chase to a bounce pattern (1-2-3-2-1 instead of 1-2-3-1-2-3)
 - Display sensor data (temperature, distance, etc.)
 - Add button input to change the message
 - Create a simple menu system
@@ -162,6 +225,6 @@ Found an issue or want to improve the documentation? Feel free to submit a pull 
 
 ---
 
-**Made with ❤️ for Arduino beginners**
+**Made with Arduino**
 
 *Part of the [arduino-projects](https://github.com/afragop72/arduino-projects) collection*

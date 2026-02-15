@@ -10,16 +10,22 @@
    - White text on blue backlight
    - 16 pins
 
-3. **10kΩ Potentiometer** (1x)
-   - For LCD contrast adjustment
+3. **10kΩ Potentiometer** (2x)
+   - Pot 1: LCD contrast adjustment (hardware)
+   - Pot 2: LCD brightness control (read by Arduino on A1)
 
-4. **220Ω Resistor** (1x)
-   - For LCD backlight current limiting
+4. **220Ω Resistor** (4x)
+   - 1 for LCD backlight current limiting
+   - 3 for LED current limiting (one per LED)
 
-5. **Breadboard** (1x)
-   - Half-size or full-size
+5. **LED** (3x)
+   - Suggested colours: red, yellow, green
+   - Standard 5mm through-hole
 
-6. **Jumper Wires** (approx. 16-20)
+6. **Breadboard** (1x)
+   - Full-size recommended (more room for pots and LEDs)
+
+7. **Jumper Wires** (approx. 20-25)
    - Male-to-male for breadboard connections
    - Various lengths recommended
 
@@ -37,5 +43,5 @@
 
 ## Estimated Cost
 
-~$25-35 USD for all components if purchased separately
+~$30-40 USD for all components if purchased separately
 (Prices vary by supplier and region)

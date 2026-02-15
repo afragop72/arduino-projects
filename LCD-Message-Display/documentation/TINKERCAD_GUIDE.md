@@ -17,29 +17,31 @@ From the components panel on the right, search and add:
 |-----------|----------|-------|
 | Arduino Uno R3 | 1 | Pre-configured board |
 | LCD 16x2 | 1 | Search "LCD 16 x 2" |
-| Potentiometer | 1 | 10kΩ (optional - see alternatives) |
-| Resistor | 1 | 220Ω for backlight |
-| Breadboard | 1 | Optional but recommended |
+| Potentiometer | 2 | 10kΩ — one for contrast, one for brightness |
+| Resistor (220Ω) | 1 | For backlight current limiting |
+| Resistor (220Ω) | 3 | One per LED (current limiting) |
+| LED | 3 | Any colour (e.g., red, yellow, green) |
+| Breadboard | 1 | Full-size recommended |
 
 ## Wiring the Circuit
-
-Wire according to the main wiring diagram. The LCD pins in TinkerCad are numbered 1-16. Your physical LCD may have labels (GND, VCC, V/O, etc.) instead - both formats are shown below.
 
 ### Power Connections
 - LCD Pin 1 (GND/VSS) → Arduino GND
 - LCD Pin 2 (VCC/VDD) → Arduino 5V
 
-### Contrast Control
+### Contrast Potentiometer (Pot 1 — hardware only)
+- Terminal 1 → Arduino 5V
+- Wiper (middle) → LCD Pin 3 (V/O)
+- Terminal 2 → Arduino GND
 
-**Option A: With Potentiometer (adjustable contrast)**
-- Potentiometer Terminal 1 → Arduino 5V
-- Potentiometer Wiper (middle) → LCD Pin 3 (V/O)
-- Potentiometer Terminal 2 → Arduino GND
+This pot adjusts contrast directly via voltage — no code needed.
 
-**Option B: Without Potentiometer (recommended for beginners)**
-- LCD Pin 3 (V/O) → Arduino GND (direct connection)
-- This gives maximum contrast and works for most LCDs
-- If text is invisible, try connecting Pin 3 to Arduino 3.3V instead
+### Brightness Potentiometer (Pot 2 — software controlled)
+- Terminal 1 → Arduino 5V
+- Wiper (middle) → Arduino A1
+- Terminal 2 → Arduino GND
+
+The Arduino reads this pot on A1 and uses PWM on pin 6 to control backlight brightness.
 
 ### Control Pins
 - LCD Pin 4 (RS) → Arduino Digital Pin 12
@@ -53,11 +55,28 @@ Wire according to the main wiring diagram. The LCD pins in TinkerCad are numbere
 - LCD Pin 14 (DB7/D7) → Arduino Digital Pin 2
 - (Pins 7-10 are not connected in 4-bit mode)
 
-### Backlight (Optional in TinkerCad)
-- LCD Pin 15 (LED+/A) → 220Ω resistor → Arduino 5V
+### Backlight (PWM controlled)
+- LCD Pin 15 (LED+/A) → 220Ω resistor → Arduino Digital Pin 6 (PWM)
 - LCD Pin 16 (LED-/K) → Arduino GND
 
-**Note:** In TinkerCad, the backlight works even without the resistor, but include it for real-world accuracy.
+**Important:** The backlight anode connects to Arduino **pin 6** (not 5V) so the code can control brightness via PWM.
+
+### LED Chase Lights (3 LEDs)
+
+Each LED connects through a 220Ω resistor to its Arduino pin:
+
+| LED | Colour (suggested) | Arduino Pin | Resistor |
+|-----|---------------------|-------------|----------|
+| LED 1 | Red | Pin 7 | 220Ω |
+| LED 2 | Yellow | Pin 8 | 220Ω |
+| LED 3 | Green | Pin 9 | 220Ω |
+
+**Wiring per LED:**
+```
+Arduino Pin → 220Ω resistor → LED Anode (+, longer leg) → LED Cathode (-, shorter leg) → GND
+```
+
+Connect all LED cathodes to the GND rail on the breadboard.
 
 ## Adding the Code
 
@@ -65,46 +84,102 @@ Wire according to the main wiring diagram. The LCD pins in TinkerCad are numbere
 2. **Switch** from "Blocks" to "Text" using the dropdown
 3. **Delete** the default code
 4. **Copy and paste** the code from `LCD_Name_Display.ino`
-5. **Edit** line 19 to change "Your Full Name" to your actual name
 
 ```cpp
 #include <LiquidCrystal.h>
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
+const int LCD_COLS = 16;
+const int BRIGHTNESS_PIN = 6;
+const int BRIGHTNESS_POT = A1;
+const int LED_PINS[] = {7, 8, 9};
+const int NUM_LEDS = 3;
+
+const char* line1 = "Hello! My name is Andreas Fragkopoulos!";
+const char* line2 = "Coding with Arduino, rocks!";
+
+int scrollPos = 0;
+int maxLen;
+
 void setup() {
-  lcd.begin(16, 2);
-  lcd.setCursor(0, 0);
-  lcd.print("Your Full Name");  // <- Edit this line
-  lcd.setCursor(0, 1);
-  lcd.print("Arduino Uno R3");
+  lcd.begin(LCD_COLS, 2);
+  lcd.clear();
+  pinMode(BRIGHTNESS_PIN, OUTPUT);
+  for (int i = 0; i < NUM_LEDS; i++) {
+    pinMode(LED_PINS[i], OUTPUT);
+    digitalWrite(LED_PINS[i], LOW);
+  }
+  int len1 = strlen(line1);
+  int len2 = strlen(line2);
+  maxLen = max(len1, len2);
 }
 
 void loop() {
-  // Nothing here
+  int brightness = analogRead(BRIGHTNESS_POT);
+  analogWrite(BRIGHTNESS_PIN, map(brightness, 0, 1023, 0, 255));
+
+  lcd.setCursor(0, 0);
+  printScrolled(line1, scrollPos);
+  lcd.setCursor(0, 1);
+  printScrolled(line2, scrollPos);
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    digitalWrite(LED_PINS[i], (i == scrollPos % NUM_LEDS) ? HIGH : LOW);
+  }
+
+  scrollPos++;
+  if (scrollPos > maxLen) scrollPos = 0;
+  delay(300);
+}
+
+void printScrolled(const char* msg, int offset) {
+  int len = strlen(msg);
+  for (int i = 0; i < LCD_COLS; i++) {
+    int idx = offset + i;
+    if (idx < len) lcd.write(msg[idx]);
+    else lcd.write(' ');
+  }
 }
 ```
 
 ## Running the Simulation
 
 1. **Click** "Start Simulation" (green button)
-2. **Observe** the LCD display
-3. **Adjust** the potentiometer by clicking and dragging the slider
-4. **Verify** your name appears on the first line
+2. **Adjust the contrast pot** — turn it until text is clearly visible on the LCD
+3. **Adjust the brightness pot** — turn it to dim or brighten the LCD backlight
+4. **Observe the LEDs** — they should chase in sequence (red → yellow → green) in sync with the scrolling text
+5. **Verify** both messages scroll across the LCD
+
+## What to Expect
+
+- **Contrast pot**: Turning it changes text visibility (too light ↔ clear ↔ too dark). Find the sweet spot.
+- **Brightness pot**: Turning it dims or brightens the LCD backlight smoothly.
+- **LEDs**: One LED lights up at a time, cycling through all three with each scroll step. The chase pattern repeats continuously.
 
 ## Troubleshooting in TinkerCad
 
 ### No text visible
-- **If using potentiometer:** Adjust the potentiometer slider (contrast control)
-- **If Pin 3 is grounded:** Try connecting Pin 3 (V/O) to 3.3V instead
+- **Adjust the contrast pot** (Pot 1) — this is the most common issue
 - **Check** VCC/VDD (Pin 2) is connected to 5V
 - **Check** GND/VSS (Pin 1) is connected to GND
+
+### Backlight not working or not responding to pot
+- **Verify** LCD Pin 15 (A) goes through 220Ω to Arduino **Pin 6** (not 5V)
+- **Verify** LCD Pin 16 (K) is connected to GND
+- **Check** the brightness pot wiper is connected to **A1**
+- **Ensure** both outer pot terminals go to 5V and GND
+
+### LEDs not lighting up
+- **Check** each LED has a 220Ω resistor in series
+- **Verify** LED anodes go to pins 7, 8, 9 (through resistors)
+- **Verify** LED cathodes go to GND
+- **Check** LED polarity — longer leg is anode (+)
 
 ### Garbled characters
 - **Verify** data pins DB4-DB7 (LCD pins 11-14) are connected to Arduino pins 5, 4, 3, 2
 - **Double-check** you haven't mixed up the data pin order
-- **Ensure** RW (Pin 5) is grounded - LCD must be in write mode
-- **Ensure** connections are secure (not connected to breadboard holes with no continuity)
+- **Ensure** RW (Pin 5) is grounded
 
 ### Compilation errors
 - **Make sure** you included `#include <LiquidCrystal.h>`
@@ -112,17 +187,16 @@ void loop() {
 - **Check** for typos in function names
 
 ### LCD shows rectangles (blocks)
-- This is normal! It means the LCD is powered but not receiving data correctly
-- **If using potentiometer:** Adjust it to find the right contrast
-- **If Pin 3 grounded:** This might be a contrast issue - try 3.3V instead
+- This means the LCD is powered but not receiving data correctly
+- **Adjust the contrast pot** to find the right level
 - **Check** RS (Pin 4) and E (Pin 6) connections
 - **Verify** RW (Pin 5) is grounded
 
 ## TinkerCad-Specific Features
 
-### Adjusting Contrast
-- Unlike physical hardware, you can drag a slider to adjust the potentiometer
-- The LCD responds immediately to contrast changes
+### Adjusting Potentiometers
+- Click and drag the slider on each pot to adjust
+- The LCD and LEDs respond immediately to changes
 
 ### Serial Monitor
 - Click the "Serial Monitor" button to see debug output
@@ -132,41 +206,37 @@ void loop() {
 - Click "Share" to get a public link
 - Great for getting help or showing your work
 
-### Exporting
-- You can export your circuit as a PDF or image
-- Download the code as a `.ino` file
+## Complete Pin Summary
 
-## Advantages of Simulating First
-
-✅ **Safe testing** - No risk of damaging components with incorrect wiring
-✅ **Instant feedback** - See results immediately without uploading code
-✅ **Easy debugging** - Quickly rewire and test different configurations
-✅ **Learning tool** - Understand how components interact before building
-✅ **Documentation** - Save and share your working circuit design
+| Arduino Pin | Connected To | Purpose |
+|-------------|-------------|---------|
+| 5V | LCD Pin 2, Pot 1 Terminal, Pot 2 Terminal | Power |
+| GND | LCD Pins 1/5/16, Pot terminals, LED cathodes | Ground |
+| Pin 12 | LCD Pin 4 (RS) | Register Select |
+| Pin 11 | LCD Pin 6 (E) | Enable |
+| Pin 6 | LCD Pin 15 (A) via 220Ω | Backlight PWM |
+| Pin 5 | LCD Pin 11 (DB4) | Data bit 4 |
+| Pin 4 | LCD Pin 12 (DB5) | Data bit 5 |
+| Pin 3 | LCD Pin 13 (DB6) | Data bit 6 |
+| Pin 2 | LCD Pin 14 (DB7) | Data bit 7 |
+| Pin 7 | LED 1 via 220Ω | Chase LED (red) |
+| Pin 8 | LED 2 via 220Ω | Chase LED (yellow) |
+| Pin 9 | LED 3 via 220Ω | Chase LED (green) |
+| A1 | Pot 2 wiper | Brightness reading |
+| — | Pot 1 wiper → LCD Pin 3 | Contrast (hardware) |
 
 ## Moving to Physical Hardware
 
 Once your simulation works:
 
 1. **Take a screenshot** of your TinkerCad circuit for reference
-2. **Note your LCD pin labels** - Your physical LCD may have labels (GND, VCC, V/O, RS, RW, E, DB0-DB7, LED) instead of numbers (1-16). See QUICK_REFERENCE.md for labeled pin mapping.
-3. **Follow the same wiring** on your physical breadboard
-4. **Upload the code** to your real Arduino using Arduino IDE
-5. **Adjust contrast**:
-   - If you have a potentiometer: Turn it until text is clearly visible
-   - If no potentiometer: Connect V/O (Pin 3) directly to GND (or try 3.3V if needed)
+2. **Follow the same wiring** on your physical breadboard
+3. **Upload the code** to your real Arduino using Arduino IDE
+4. **Adjust contrast** by turning the contrast potentiometer
+5. **Adjust brightness** by turning the brightness potentiometer
 
 ## Additional Resources
 
 - [TinkerCad Circuits Tutorial](https://www.tinkercad.com/learn/circuits)
 - [Arduino Reference](https://www.arduino.cc/reference/en/)
 - [LiquidCrystal Library](https://www.arduino.cc/en/Reference/LiquidCrystal)
-
-## Common TinkerCad Limitations
-
-- Simulation runs slower than real hardware
-- Some advanced Arduino features may not be available
-- Real-world timing may differ slightly
-- Component values are idealized
-
-Despite these limitations, TinkerCad is excellent for learning and prototyping!
