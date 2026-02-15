@@ -37,8 +37,9 @@ void setup() {
   lcd.begin(LCD_COLS, 2);
   lcd.clear();
 
-  // Set up brightness control
+  // Set up brightness control (start at full brightness)
   pinMode(BRIGHTNESS_PIN, OUTPUT);
+  analogWrite(BRIGHTNESS_PIN, 255);
 
   // Set up LED pins
   for (int i = 0; i < NUM_LEDS; i++) {
