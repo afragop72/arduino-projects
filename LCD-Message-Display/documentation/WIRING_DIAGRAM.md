@@ -25,7 +25,9 @@
                     │          │     │      │               │                 │
                     │    Pin 2 ├─────┼──────┼───────────────┤ 14 (D7)         │
                     │          │     │      │               │                 │
-                    │    Pin 7 ├──[220Ω]──LED1 (red)        │ 3 (VO) ─────┐   │
+                    │   Pin 10 ├──── Slideswitch common      │ 3 (VO) ─────┐   │
+                    │          │     │      │               │             │   │
+                    │    Pin 7 ├──[220Ω]──LED1 (red)        │             │   │
                     │          │     │      │               │             │   │
                     │    Pin 8 ├──[220Ω]──LED2 (yellow)     │ 15 (A/LED+)│   │
                     │          │     │      │               │      │      │   │
@@ -99,6 +101,16 @@
 
 The Arduino reads the voltage on A1 (0-1023) and maps it to a scroll delay (100ms–500ms), controlling how fast text scrolls and LEDs chase.
 
+### Power Switch (Slideswitch — SPDT)
+
+| Switch Pin     | Connection  | Purpose                             |
+| -------------- | ----------- | ----------------------------------- |
+| Terminal 1     | Arduino 5V  | ON position (HIGH)                  |
+| Common (middle)| Arduino Pin 10 | Digital input read by code       |
+| Terminal 2     | Arduino GND | OFF position (LOW)                  |
+
+When the switch connects pin 10 to 5V, the system runs. When it connects to GND, the LCD clears and LEDs turn off.
+
 ### LED Chase Lights
 
 | LED            | Arduino Pin | Resistor | Cathode |
@@ -138,22 +150,27 @@ Do connections in this order to avoid mistakes:
    - Pot 2 outer pins → 5V and GND rails
    - Pot 2 wiper → Arduino A1
 
-4. **Control pins**
+4. **Power switch**
+   - Slideswitch Terminal 1 → 5V rail
+   - Slideswitch Common → Arduino Pin 10
+   - Slideswitch Terminal 2 → GND rail
+
+5. **Control pins**
    - LCD Pin 4 (RS) → Arduino Pin 12
    - LCD Pin 5 (RW) → GND rail
    - LCD Pin 6 (E) → Arduino Pin 11
 
-5. **Data pins (D4-D7 only)**
+6. **Data pins (D4-D7 only)**
    - LCD Pin 11 (D4) → Arduino Pin 5
    - LCD Pin 12 (D5) → Arduino Pin 4
    - LCD Pin 13 (D6) → Arduino Pin 3
    - LCD Pin 14 (D7) → Arduino Pin 2
 
-6. **Backlight (always on)**
+7. **Backlight (always on)**
    - LCD Pin 15 (A) → 220Ω resistor → 5V rail
    - LCD Pin 16 (K) → GND rail
 
-7. **LEDs (last)**
+8. **LEDs (last)**
    - LED 1: Pin 7 → 220Ω → red LED → GND rail
    - LED 2: Pin 8 → 220Ω → yellow LED → GND rail
    - LED 3: Pin 9 → 220Ω → green LED → GND rail
@@ -204,6 +221,7 @@ Before starting, verify you have:
 - [ ] Arduino Uno R3
 - [ ] 16x2 LCD with HD44780 controller
 - [ ] 10kΩ potentiometer x2 (contrast + scroll speed)
+- [ ] SPDT slideswitch x1 (power ON/OFF)
 - [ ] 220Ω resistor x4 (1 for backlight, 3 for LEDs)
 - [ ] LED x3 (red, yellow, green)
 - [ ] Breadboard (full-size recommended)

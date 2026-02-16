@@ -14,18 +14,22 @@
    - Pot 1: LCD contrast adjustment (hardware)
    - Pot 2: Scroll speed control (read by Arduino on A1)
 
-4. **220Ω Resistor** (4x)
+4. **SPDT Slideswitch** (1x)
+   - System ON/OFF toggle
+   - Connected to Arduino Pin 10
+
+5. **220Ω Resistor** (4x)
    - 1 for LCD backlight current limiting
    - 3 for LED current limiting (one per LED)
 
-5. **LED** (3x)
+6. **LED** (3x)
    - Suggested colours: red, yellow, green
    - Standard 5mm through-hole
 
-6. **Breadboard** (1x)
+7. **Breadboard** (1x)
    - Full-size recommended (more room for pots and LEDs)
 
-7. **Jumper Wires** (approx. 20-25)
+8. **Jumper Wires** (approx. 20-25)
    - Male-to-male for breadboard connections
    - Various lengths recommended
 

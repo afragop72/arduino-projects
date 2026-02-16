@@ -38,6 +38,14 @@ GND → VCC → V/O → RS → RW → E → DB0 → DB1 → DB2 → DB3 → DB4 
 | Contrast     | 5V         | LCD V/O        | GND        |
 | Scroll Speed | 5V         | Arduino A1     | GND        |
 
+## Power Switch (Slideswitch)
+
+| Switch Pin     | Connection  |
+| -------------- | ----------- |
+| Terminal 1     | 5V          |
+| Common (middle)| Arduino Pin 10 |
+| Terminal 2     | GND         |
+
 ## LED Chase Connections
 
 | LED            | Arduino Pin | Resistor | Cathode |
@@ -58,18 +66,24 @@ GND → VCC → V/O → RS → RW → E → DB0 → DB1 → DB2 → DB3 → DB4 
 - Pot outer pins → 5V and GND
 - Pot wiper → LCD V/O
 
-**3. Scroll speed pot:**
+**3. Power switch:**
+
+- Terminal 1 → 5V
+- Common (middle) → Arduino Pin 10
+- Terminal 2 → GND
+
+**4. Scroll speed pot:**
 
 - Pot outer pins → 5V and GND
 - Pot wiper → Arduino A1
 
-**4. Control signals:**
+**5. Control signals:**
 
 - RS → Arduino Pin 12
 - RW → Arduino GND
 - E → Arduino Pin 11
 
-**5. Data lines (4-bit mode):**
+**6. Data lines (4-bit mode):**
 
 - DB4 → Arduino Pin 5
 - DB5 → Arduino Pin 4
@@ -77,12 +91,12 @@ GND → VCC → V/O → RS → RW → E → DB0 → DB1 → DB2 → DB3 → DB4 
 - DB7 → Arduino Pin 2
 - (DB0-DB3 not connected)
 
-**6. Backlight:**
+**7. Backlight:**
 
 - LED (left) → 220Ω resistor → 5V
 - LED (right) → Arduino GND
 
-**7. Chase LEDs:**
+**8. Chase LEDs:**
 
 - Pin 7 → 220Ω → Red LED → GND
 - Pin 8 → 220Ω → Yellow LED → GND
@@ -96,6 +110,7 @@ Make sure your Arduino code matches:
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 //               RS  E  D4 D5 D6 D7
 
+const int POWER_SWITCH = 10;          // ON/OFF switch
 const int SPEED_POT = A1;            // Scroll speed pot input
 const int LED_PINS[] = {7, 8, 9};    // Chase LEDs
 ```

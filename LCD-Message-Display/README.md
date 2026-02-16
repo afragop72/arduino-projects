@@ -1,6 +1,6 @@
 # LCD Name Display
 
-Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with adjustable contrast, adjustable scroll speed, and LED chase lights.
+Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with a power switch, adjustable contrast, adjustable scroll speed, and LED chase lights.
 
 ![Arduino](https://img.shields.io/badge/Arduino-Uno%20R3-00979D?logo=arduino&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Ready-success)
@@ -8,9 +8,10 @@ Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with adjustable co
 
 ## Overview
 
-This project demonstrates how to interface a 16x2 character LCD (HD44780 controller) with an Arduino Uno R3 to display scrolling custom text. It includes two potentiometers (contrast and scroll speed) and three LEDs that chase in sequence with the scrolling text.
+This project demonstrates how to interface a 16x2 character LCD (HD44780 controller) with an Arduino Uno R3 to display scrolling custom text. It includes a power switch, two potentiometers (contrast and scroll speed), and three LEDs that chase in sequence with the scrolling text.
 
 **Features:**
+- Slideswitch to power the system ON/OFF
 - Scrolling text across both LCD lines
 - 4-bit mode connection (saves Arduino pins)
 - Potentiometer for contrast control (hardware)
@@ -26,6 +27,7 @@ This project demonstrates how to interface a 16x2 character LCD (HD44780 control
 - Arduino Uno R3
 - 16x2 LCD with HD44780 controller (white on blue backlight)
 - 10kΩ potentiometer x2 (contrast + scroll speed)
+- SPDT slideswitch x1 (power ON/OFF)
 - 220Ω resistor x4 (1 for backlight, 3 for LEDs)
 - LED x3 (red, yellow, green)
 - Breadboard (full-size recommended) and jumper wires
@@ -65,7 +67,15 @@ Connect your LCD to the Arduino following this pinout:
 | Contrast     | 5V         | LCD V/O        | GND        |
 | Scroll Speed | 5V         | Arduino A1     | GND        |
 
-### 3. Wire the LEDs
+### 3. Wire the Power Switch
+
+| Switch Pin     | Connection  |
+| -------------- | ----------- |
+| Terminal 1     | 5V          |
+| Common (middle)| Arduino Pin 10 |
+| Terminal 2     | GND         |
+
+### 4. Wire the LEDs
 
 Each LED connects through a 220Ω resistor:
 
@@ -75,7 +85,7 @@ Each LED connects through a 220Ω resistor:
 | Yellow | Pin 8       | 220Ω     | GND     |
 | Green  | Pin 9       | 220Ω     | GND     |
 
-### 4. Upload the Code
+### 5. Upload the Code
 
 1. Open `LCD_Name_Display.ino` in Arduino IDE
 2. Edit lines 32-33 to customise the scrolling messages
@@ -83,8 +93,9 @@ Each LED connects through a 220Ω resistor:
 4. Select your COM port under **Tools > Port**
 5. Click **Upload** (or press Ctrl+U)
 
-### 5. Adjust Controls
+### 6. Adjust Controls
 
+- **Power switch**: Flip to ON to start, OFF to stop
 - **Contrast pot**: Turn until text is clearly visible on the LCD
 - **Scroll speed pot**: Turn to speed up or slow down scrolling and LED chase
 - **LEDs**: They chase automatically in sync with scrolling text
@@ -111,6 +122,7 @@ Try your circuit in [TinkerCad](https://www.tinkercad.com) first! See the [Tinke
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 const int LCD_COLS = 16;
+const int POWER_SWITCH = 10;
 const int SPEED_POT = A1;
 const int LED_PINS[] = {7, 8, 9};
 const int NUM_LEDS = 3;
@@ -120,10 +132,12 @@ const char* line2 = "Coding with Arduino, rocks!";
 
 int scrollPos = 0;
 int maxLen;
+bool wasOff = true;
 
 void setup() {
   lcd.begin(LCD_COLS, 2);
   lcd.clear();
+  pinMode(POWER_SWITCH, INPUT);
   for (int i = 0; i < NUM_LEDS; i++) {
     pinMode(LED_PINS[i], OUTPUT);
     digitalWrite(LED_PINS[i], LOW);
@@ -132,6 +146,16 @@ void setup() {
 }
 
 void loop() {
+  if (digitalRead(POWER_SWITCH) == LOW) {
+    if (!wasOff) {
+      lcd.clear(); lcd.noDisplay();
+      for (int i = 0; i < NUM_LEDS; i++) digitalWrite(LED_PINS[i], LOW);
+      scrollPos = 0; wasOff = true;
+    }
+    delay(100); return;
+  }
+  if (wasOff) { lcd.display(); lcd.clear(); wasOff = false; }
+
   int speedVal = analogRead(SPEED_POT);
   int scrollDelay = map(speedVal, 0, 1023, 100, 500);
 
@@ -163,6 +187,7 @@ void printScrolled(const char* msg, int offset) {
 
 | Arduino Pin | Purpose                |
 | ----------- | ---------------------- |
+| Pin 10      | Power switch (ON/OFF)  |
 | Pin 12      | LCD RS                 |
 | Pin 11      | LCD E                  |
 | Pin 5       | LCD DB4                |

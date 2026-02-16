@@ -18,6 +18,7 @@ From the components panel on the right, search and add:
 | Arduino Uno R3 | 1 | Pre-configured board |
 | LCD 16x2 | 1 | Search "LCD 16 x 2" |
 | Potentiometer | 2 | 10kΩ — one for contrast, one for scroll speed |
+| Slideswitch | 1 | SPDT — system ON/OFF toggle |
 | Resistor (220Ω) | 4 | 1 for backlight, 3 for LEDs |
 | LED | 3 | Any colour (e.g., red, yellow, green) |
 | Breadboard | 1 | Full-size recommended |
@@ -44,6 +45,16 @@ This pot adjusts contrast directly via voltage — no code needed.
 - Terminal 2 → Arduino GND
 
 The Arduino reads this pot on A1 and adjusts the scroll delay (100ms–500ms). Turning the pot changes how fast text scrolls and LEDs chase.
+
+### Power Switch (Slideswitch)
+
+The slideswitch acts as a system ON/OFF toggle. It has 3 pins:
+
+- Terminal 1 → Arduino 5V
+- Common (middle) → Arduino Digital Pin 10
+- Terminal 2 → Arduino GND
+
+When the switch connects pin 10 to 5V (HIGH), the system runs. When it connects pin 10 to GND (LOW), the LCD clears, LEDs turn off, and scrolling stops.
 
 ### Control Pins
 
@@ -97,6 +108,7 @@ Connect all LED cathodes to the GND rail on the breadboard.
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 const int LCD_COLS = 16;
+const int POWER_SWITCH = 10;
 const int SPEED_POT = A1;
 const int LED_PINS[] = {7, 8, 9};
 const int NUM_LEDS = 3;
@@ -106,10 +118,12 @@ const char* line2 = "Coding with Arduino, rocks!";
 
 int scrollPos = 0;
 int maxLen;
+bool wasOff = true;
 
 void setup() {
   lcd.begin(LCD_COLS, 2);
   lcd.clear();
+  pinMode(POWER_SWITCH, INPUT);
   for (int i = 0; i < NUM_LEDS; i++) {
     pinMode(LED_PINS[i], OUTPUT);
     digitalWrite(LED_PINS[i], LOW);
@@ -120,6 +134,19 @@ void setup() {
 }
 
 void loop() {
+  if (digitalRead(POWER_SWITCH) == LOW) {
+    if (!wasOff) {
+      lcd.clear();
+      lcd.noDisplay();
+      for (int i = 0; i < NUM_LEDS; i++) digitalWrite(LED_PINS[i], LOW);
+      scrollPos = 0;
+      wasOff = true;
+    }
+    delay(100);
+    return;
+  }
+  if (wasOff) { lcd.display(); lcd.clear(); wasOff = false; }
+
   int speedVal = analogRead(SPEED_POT);
   int scrollDelay = map(speedVal, 0, 1023, 100, 500);
 
@@ -150,13 +177,17 @@ void printScrolled(const char* msg, int offset) {
 ## Running the Simulation
 
 1. **Click** "Start Simulation" (green button)
-2. **Adjust the contrast pot** — turn it until text is clearly visible on the LCD
-3. **Adjust the scroll speed pot** — turn it to speed up or slow down the scrolling text and LED chase
-4. **Observe the LEDs** — they should chase in sequence (red → yellow → green) in sync with the scrolling text
-5. **Verify** both messages scroll across the LCD
+2. **Flip the slideswitch** to the ON position (toward 5V)
+3. **Adjust the contrast pot** — turn it until text is clearly visible on the LCD
+4. **Adjust the scroll speed pot** — turn it to speed up or slow down the scrolling text and LED chase
+5. **Observe the LEDs** — they should chase in sequence (red → yellow → green) in sync with the scrolling text
+6. **Verify** both messages scroll across the LCD
+7. **Flip the switch OFF** — LCD text disappears and LEDs turn off
+8. **Flip it back ON** — everything resumes from the beginning
 
 ## What to Expect
 
+- **Power switch**: Flip to ON to start the system, OFF to stop (LCD clears, LEDs off).
 - **Contrast pot**: Turning it changes text visibility (too light ↔ clear ↔ too dark). Find the sweet spot.
 - **Scroll speed pot**: Turning it makes the text and LEDs scroll faster (100ms delay) or slower (500ms delay).
 - **LEDs**: One LED lights up at a time, cycling through all three with each scroll step. The chase pattern repeats continuously.
@@ -238,6 +269,7 @@ void printScrolled(const char* msg, int offset) {
 | Pin 7 | LED 1 via 220Ω | Chase LED (red) |
 | Pin 8 | LED 2 via 220Ω | Chase LED (yellow) |
 | Pin 9 | LED 3 via 220Ω | Chase LED (green) |
+| Pin 10 | Slideswitch common | Power ON/OFF |
 | A1 | Pot 2 wiper | Scroll speed reading |
 | — | Pot 1 wiper → LCD Pin 3 | Contrast (hardware) |
 

@@ -3,12 +3,15 @@
  * Scrolls a long message across a 16x2 HD44780 LCD
  * Board: Arduino Uno R3
  *
+ * Power switch:
+ *   - Slideswitch on pin 10                    (ON/OFF system toggle)
+ *
  * Potentiometers:
- *   - 10kΩ on LCD Pin 3 (V/O) for contrast     (hardware only, no code)
- *   - 10kΩ on A1 for scroll speed               (read by code, adjusts delay)
+ *   - 10kΩ on LCD Pin 3 (V/O) for contrast    (hardware only, no code)
+ *   - 10kΩ on A1 for scroll speed              (read by code, adjusts delay)
  *
  * Backlight:
- *   - LCD Pin 15 (A) → 220Ω → 5V               (always on)
+ *   - LCD Pin 15 (A) → 220Ω → 5V              (always on)
  *
  * LEDs:
  *   - 3 LEDs on pins 7, 8, 9 cycle in a chase pattern with each scroll step
@@ -20,6 +23,10 @@
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 const int LCD_COLS = 16;
+
+// Power switch
+const int POWER_SWITCH = 10;
+bool wasOff = true;  // Track state to re-init LCD when switching on
 
 // Scroll speed control
 const int SPEED_POT = A1;  // Analog input from speed potentiometer
@@ -39,6 +46,9 @@ void setup() {
   lcd.begin(LCD_COLS, 2);
   lcd.clear();
 
+  // Set up power switch
+  pinMode(POWER_SWITCH, INPUT);
+
   // Set up LED pins
   for (int i = 0; i < NUM_LEDS; i++) {
     pinMode(LED_PINS[i], OUTPUT);
@@ -52,6 +62,29 @@ void setup() {
 }
 
 void loop() {
+  // Check power switch
+  if (digitalRead(POWER_SWITCH) == LOW) {
+    // System OFF: clear LCD, turn off LEDs
+    if (!wasOff) {
+      lcd.clear();
+      lcd.noDisplay();
+      for (int i = 0; i < NUM_LEDS; i++) {
+        digitalWrite(LED_PINS[i], LOW);
+      }
+      scrollPos = 0;
+      wasOff = true;
+    }
+    delay(100);
+    return;
+  }
+
+  // System ON: re-init display if just switched on
+  if (wasOff) {
+    lcd.display();
+    lcd.clear();
+    wasOff = false;
+  }
+
   // Read speed pot: 0 = fast (100ms), 1023 = slow (500ms)
   int speedVal = analogRead(SPEED_POT);
   int scrollDelay = map(speedVal, 0, 1023, 100, 500);
