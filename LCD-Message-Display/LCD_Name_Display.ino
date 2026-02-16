@@ -18,6 +18,7 @@
  *
  * Features:
  *   - Wrap-around scrolling (text loops seamlessly with a gap)
+ *   - Custom arrow separator (►) in the scroll gap using HD44780 CGRAM
  *   - Startup animation (splash screen + LED sweep) on power-on
  */
 
@@ -39,6 +40,18 @@ const int SPEED_POT = A1;  // Analog input from speed potentiometer
 const int LED_PINS[] = {7, 8, 9};
 const int NUM_LEDS = 3;
 
+// Custom arrow character for scroll gap separator (stored in CGRAM slot 0)
+byte arrowChar[8] = {
+  0b00000,
+  0b00100,
+  0b00010,
+  0b11111,
+  0b00010,
+  0b00100,
+  0b00000,
+  0b00000
+};
+
 // Messages to scroll (can be longer than 16 characters)
 const char* line1 = "Hello! My name is Andreas Fragkopoulos!";
 const char* line2 = "Coding with Arduino, rocks!";
@@ -49,6 +62,7 @@ const int SCROLL_GAP = 8;  // Space gap between end and start of wrap-around
 
 void setup() {
   lcd.begin(LCD_COLS, 2);
+  lcd.createChar(0, arrowChar);  // Store custom arrow in CGRAM slot 0
   lcd.clear();
 
   // Set up power switch
@@ -151,14 +165,17 @@ void playStartup() {
 }
 
 // Prints a scrolling window of 16 characters with wrap-around.
-// After the message ends, a gap of spaces appears, then the message restarts.
+// After the message ends, a gap with an arrow separator appears, then the message restarts.
 void printScrolled(const char* msg, int offset) {
   int len = strlen(msg);
   int totalLen = len + SCROLL_GAP;
+  int arrowPos = len + SCROLL_GAP / 2;  // Arrow in the middle of the gap
   for (int i = 0; i < LCD_COLS; i++) {
     int idx = (offset + i) % totalLen;
     if (idx < len) {
       lcd.write(msg[idx]);
+    } else if (idx == arrowPos) {
+      lcd.write(byte(0));  // Custom arrow character
     } else {
       lcd.write(' ');
     }

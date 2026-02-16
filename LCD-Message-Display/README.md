@@ -1,6 +1,6 @@
 # LCD Name Display
 
-Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with wrap-around scrolling, startup animation, power switch, adjustable contrast, scroll speed control, and LED bounce lights.
+Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with wrap-around scrolling, custom arrow separator, startup animation, power switch, adjustable contrast, scroll speed control, and LED bounce lights.
 
 ![Arduino](https://img.shields.io/badge/Arduino-Uno%20R3-00979D?logo=arduino&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Ready-success)
@@ -13,6 +13,7 @@ This project demonstrates how to interface a 16x2 character LCD (HD44780 control
 **Features:**
 - Slideswitch to power the system ON/OFF
 - Wrap-around scrolling (text loops seamlessly with a gap)
+- Custom arrow separator (►) in the scroll gap using HD44780 CGRAM
 - Startup animation with splash screen and LED sweep on power-on
 - 4-bit mode connection (saves Arduino pins)
 - Potentiometer for contrast control (hardware)
@@ -89,7 +90,7 @@ Each LED connects through a 220Ω resistor:
 ### 5. Upload the Code
 
 1. Open `LCD_Name_Display.ino` in Arduino IDE
-2. Edit lines 32-33 to customise the scrolling messages
+2. Edit lines 42-43 to customise the scrolling messages
 3. Select **Tools > Board > Arduino Uno**
 4. Select your COM port under **Tools > Port**
 5. Click **Upload** (or press Ctrl+U)

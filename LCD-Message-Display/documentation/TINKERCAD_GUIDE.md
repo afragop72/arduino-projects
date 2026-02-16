@@ -113,6 +113,11 @@ const int SPEED_POT = A1;
 const int LED_PINS[] = {7, 8, 9};
 const int NUM_LEDS = 3;
 
+byte arrowChar[8] = {
+  0b00000, 0b00100, 0b00010, 0b11111,
+  0b00010, 0b00100, 0b00000, 0b00000
+};
+
 const char* line1 = "Hello! My name is Andreas Fragkopoulos!";
 const char* line2 = "Coding with Arduino, rocks!";
 
@@ -123,6 +128,7 @@ const int SCROLL_GAP = 8;
 
 void setup() {
   lcd.begin(LCD_COLS, 2);
+  lcd.createChar(0, arrowChar);
   lcd.clear();
   pinMode(POWER_SWITCH, INPUT);
   for (int i = 0; i < NUM_LEDS; i++) {
@@ -189,9 +195,11 @@ void playStartup() {
 void printScrolled(const char* msg, int offset) {
   int len = strlen(msg);
   int totalLen = len + SCROLL_GAP;
+  int arrowPos = len + SCROLL_GAP / 2;
   for (int i = 0; i < LCD_COLS; i++) {
     int idx = (offset + i) % totalLen;
     if (idx < len) lcd.write(msg[idx]);
+    else if (idx == arrowPos) lcd.write(byte(0));
     else lcd.write(' ');
   }
 }
@@ -215,7 +223,7 @@ void printScrolled(const char* msg, int offset) {
 - **Startup animation**: On power-on, a splash screen ("LCD Display / Ready...") appears with an LED sweep and double flash before scrolling begins.
 - **Contrast pot**: Turning it changes text visibility (too light ↔ clear ↔ too dark). Find the sweet spot.
 - **Scroll speed pot**: Turning it makes the text and LEDs scroll faster (100ms delay) or slower (500ms delay).
-- **Wrap-around scrolling**: Text loops continuously — after the message ends, a small gap appears, then the message starts again from the right.
+- **Wrap-around scrolling**: Text loops continuously — after the message ends, a small gap with an arrow (►) separator appears, then the message starts again from the right.
 - **LEDs**: One LED lights up at a time, bouncing back and forth (1-2-3-2-1) with each scroll step. The Knight Rider pattern repeats continuously.
 - **Backlight**: Always on (connected directly to 5V).
 
