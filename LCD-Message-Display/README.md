@@ -1,6 +1,6 @@
 # LCD Name Display
 
-Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with a power switch, adjustable contrast, adjustable scroll speed, and LED bounce lights.
+Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with wrap-around scrolling, startup animation, power switch, adjustable contrast, scroll speed control, and LED bounce lights.
 
 ![Arduino](https://img.shields.io/badge/Arduino-Uno%20R3-00979D?logo=arduino&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Ready-success)
@@ -12,7 +12,8 @@ This project demonstrates how to interface a 16x2 character LCD (HD44780 control
 
 **Features:**
 - Slideswitch to power the system ON/OFF
-- Scrolling text across both LCD lines
+- Wrap-around scrolling (text loops seamlessly with a gap)
+- Startup animation with splash screen and LED sweep on power-on
 - 4-bit mode connection (saves Arduino pins)
 - Potentiometer for contrast control (hardware)
 - Potentiometer for scroll speed control (software)
@@ -133,6 +134,7 @@ const char* line2 = "Coding with Arduino, rocks!";
 int scrollPos = 0;
 int maxLen;
 bool wasOff = true;
+const int SCROLL_GAP = 8;
 
 void setup() {
   lcd.begin(LCD_COLS, 2);
@@ -142,7 +144,7 @@ void setup() {
     pinMode(LED_PINS[i], OUTPUT);
     digitalWrite(LED_PINS[i], LOW);
   }
-  maxLen = max(strlen(line1), strlen(line2));
+  maxLen = max(strlen(line1), strlen(line2)) + SCROLL_GAP;
 }
 
 void loop() {
@@ -154,7 +156,7 @@ void loop() {
     }
     delay(100); return;
   }
-  if (wasOff) { lcd.display(); lcd.clear(); wasOff = false; }
+  if (wasOff) { lcd.display(); lcd.clear(); playStartup(); wasOff = false; }
 
   int speedVal = analogRead(SPEED_POT);
   int scrollDelay = map(speedVal, 0, 1023, 100, 500);
@@ -172,14 +174,35 @@ void loop() {
   }
 
   scrollPos++;
-  if (scrollPos > maxLen) scrollPos = 0;
+  if (scrollPos >= maxLen) scrollPos = 0;
   delay(scrollDelay);
+}
+
+void playStartup() {
+  lcd.setCursor(2, 0); lcd.print("LCD  Display");
+  lcd.setCursor(4, 1); lcd.print("Ready...");
+  for (int i = 0; i < NUM_LEDS; i++) {
+    digitalWrite(LED_PINS[i], HIGH); delay(150);
+    digitalWrite(LED_PINS[i], LOW);
+  }
+  for (int i = NUM_LEDS - 2; i >= 0; i--) {
+    digitalWrite(LED_PINS[i], HIGH); delay(150);
+    digitalWrite(LED_PINS[i], LOW);
+  }
+  for (int f = 0; f < 2; f++) {
+    for (int i = 0; i < NUM_LEDS; i++) digitalWrite(LED_PINS[i], HIGH);
+    delay(200);
+    for (int i = 0; i < NUM_LEDS; i++) digitalWrite(LED_PINS[i], LOW);
+    delay(200);
+  }
+  delay(500); lcd.clear();
 }
 
 void printScrolled(const char* msg, int offset) {
   int len = strlen(msg);
+  int totalLen = len + SCROLL_GAP;
   for (int i = 0; i < LCD_COLS; i++) {
-    int idx = offset + i;
+    int idx = (offset + i) % totalLen;
     if (idx < len) lcd.write(msg[idx]);
     else lcd.write(' ');
   }
@@ -235,7 +258,7 @@ LCD_Name_Display/
 ## Next Steps
 
 Once you've got this working, try:
-- Add wrap-around scrolling (text reappears from the right)
+- Add multiple message pairs that cycle automatically
 - Display sensor data (temperature, distance, etc.)
 - Add button input to change the message
 - Create a simple menu system

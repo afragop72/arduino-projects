@@ -119,6 +119,7 @@ const char* line2 = "Coding with Arduino, rocks!";
 int scrollPos = 0;
 int maxLen;
 bool wasOff = true;
+const int SCROLL_GAP = 8;
 
 void setup() {
   lcd.begin(LCD_COLS, 2);
@@ -128,9 +129,7 @@ void setup() {
     pinMode(LED_PINS[i], OUTPUT);
     digitalWrite(LED_PINS[i], LOW);
   }
-  int len1 = strlen(line1);
-  int len2 = strlen(line2);
-  maxLen = max(len1, len2);
+  maxLen = max(strlen(line1), strlen(line2)) + SCROLL_GAP;
 }
 
 void loop() {
@@ -145,7 +144,7 @@ void loop() {
     delay(100);
     return;
   }
-  if (wasOff) { lcd.display(); lcd.clear(); wasOff = false; }
+  if (wasOff) { lcd.display(); lcd.clear(); playStartup(); wasOff = false; }
 
   int speedVal = analogRead(SPEED_POT);
   int scrollDelay = map(speedVal, 0, 1023, 100, 500);
@@ -163,14 +162,35 @@ void loop() {
   }
 
   scrollPos++;
-  if (scrollPos > maxLen) scrollPos = 0;
+  if (scrollPos >= maxLen) scrollPos = 0;
   delay(scrollDelay);
+}
+
+void playStartup() {
+  lcd.setCursor(2, 0); lcd.print("LCD  Display");
+  lcd.setCursor(4, 1); lcd.print("Ready...");
+  for (int i = 0; i < NUM_LEDS; i++) {
+    digitalWrite(LED_PINS[i], HIGH); delay(150);
+    digitalWrite(LED_PINS[i], LOW);
+  }
+  for (int i = NUM_LEDS - 2; i >= 0; i--) {
+    digitalWrite(LED_PINS[i], HIGH); delay(150);
+    digitalWrite(LED_PINS[i], LOW);
+  }
+  for (int f = 0; f < 2; f++) {
+    for (int i = 0; i < NUM_LEDS; i++) digitalWrite(LED_PINS[i], HIGH);
+    delay(200);
+    for (int i = 0; i < NUM_LEDS; i++) digitalWrite(LED_PINS[i], LOW);
+    delay(200);
+  }
+  delay(500); lcd.clear();
 }
 
 void printScrolled(const char* msg, int offset) {
   int len = strlen(msg);
+  int totalLen = len + SCROLL_GAP;
   for (int i = 0; i < LCD_COLS; i++) {
-    int idx = offset + i;
+    int idx = (offset + i) % totalLen;
     if (idx < len) lcd.write(msg[idx]);
     else lcd.write(' ');
   }
@@ -181,18 +201,21 @@ void printScrolled(const char* msg, int offset) {
 
 1. **Click** "Start Simulation" (green button)
 2. **Flip the slideswitch** to the ON position (toward 5V)
-3. **Adjust the contrast pot** — turn it until text is clearly visible on the LCD
-4. **Adjust the scroll speed pot** — turn it to speed up or slow down the scrolling text and LED bounce
-5. **Observe the LEDs** — they should bounce back and forth (red → yellow → green → yellow → red) in sync with the scrolling text
-6. **Verify** both messages scroll across the LCD
-7. **Flip the switch OFF** — LCD text disappears and LEDs turn off
-8. **Flip it back ON** — everything resumes from the beginning
+3. **Watch the startup animation** — "LCD Display / Ready..." appears with an LED sweep and flash
+4. **Adjust the contrast pot** — turn it until text is clearly visible on the LCD
+5. **Adjust the scroll speed pot** — turn it to speed up or slow down the scrolling text and LED bounce
+6. **Observe the LEDs** — they should bounce back and forth (red → yellow → green → yellow → red) in sync with the scrolling text
+7. **Verify** text scrolls continuously and wraps around seamlessly
+8. **Flip the switch OFF** — LCD text disappears and LEDs turn off
+9. **Flip it back ON** — startup animation plays again, then scrolling resumes
 
 ## What to Expect
 
 - **Power switch**: Flip to ON to start the system, OFF to stop (LCD clears, LEDs off).
+- **Startup animation**: On power-on, a splash screen ("LCD Display / Ready...") appears with an LED sweep and double flash before scrolling begins.
 - **Contrast pot**: Turning it changes text visibility (too light ↔ clear ↔ too dark). Find the sweet spot.
 - **Scroll speed pot**: Turning it makes the text and LEDs scroll faster (100ms delay) or slower (500ms delay).
+- **Wrap-around scrolling**: Text loops continuously — after the message ends, a small gap appears, then the message starts again from the right.
 - **LEDs**: One LED lights up at a time, bouncing back and forth (1-2-3-2-1) with each scroll step. The Knight Rider pattern repeats continuously.
 - **Backlight**: Always on (connected directly to 5V).
 

@@ -15,6 +15,10 @@
  *
  * LEDs:
  *   - 3 LEDs on pins 7, 8, 9 bounce in a Knight Rider pattern with each scroll step
+ *
+ * Features:
+ *   - Wrap-around scrolling (text loops seamlessly with a gap)
+ *   - Startup animation (splash screen + LED sweep) on power-on
  */
 
 #include <LiquidCrystal.h>
@@ -41,6 +45,7 @@ const char* line2 = "Coding with Arduino, rocks!";
 
 int scrollPos = 0;
 int maxLen;
+const int SCROLL_GAP = 8;  // Space gap between end and start of wrap-around
 
 void setup() {
   lcd.begin(LCD_COLS, 2);
@@ -55,10 +60,10 @@ void setup() {
     digitalWrite(LED_PINS[i], LOW);
   }
 
-  // Calculate the longest message length for scroll wrapping
+  // Calculate the longest message length (+ gap) for wrap-around scrolling
   int len1 = strlen(line1);
   int len2 = strlen(line2);
-  maxLen = max(len1, len2);
+  maxLen = max(len1, len2) + SCROLL_GAP;
 }
 
 void loop() {
@@ -78,10 +83,11 @@ void loop() {
     return;
   }
 
-  // System ON: re-init display if just switched on
+  // System ON: re-init display and play startup animation
   if (wasOff) {
     lcd.display();
     lcd.clear();
+    playStartup();
     wasOff = false;
   }
 
@@ -105,19 +111,52 @@ void loop() {
   }
 
   scrollPos++;
-  if (scrollPos > maxLen) {
+  if (scrollPos >= maxLen) {
     scrollPos = 0;
   }
 
   delay(scrollDelay);
 }
 
-// Prints a scrolling window of 16 characters from the message.
-// Pads with spaces so short segments don't leave stale characters.
+// Startup animation: splash screen with LED sweep
+void playStartup() {
+  // Show splash text centred on LCD
+  lcd.setCursor(2, 0);
+  lcd.print("LCD  Display");
+  lcd.setCursor(4, 1);
+  lcd.print("Ready...");
+
+  // LED sweep: left to right, then right to left
+  for (int i = 0; i < NUM_LEDS; i++) {
+    digitalWrite(LED_PINS[i], HIGH);
+    delay(150);
+    digitalWrite(LED_PINS[i], LOW);
+  }
+  for (int i = NUM_LEDS - 2; i >= 0; i--) {
+    digitalWrite(LED_PINS[i], HIGH);
+    delay(150);
+    digitalWrite(LED_PINS[i], LOW);
+  }
+
+  // Flash all LEDs together twice
+  for (int f = 0; f < 2; f++) {
+    for (int i = 0; i < NUM_LEDS; i++) digitalWrite(LED_PINS[i], HIGH);
+    delay(200);
+    for (int i = 0; i < NUM_LEDS; i++) digitalWrite(LED_PINS[i], LOW);
+    delay(200);
+  }
+
+  delay(500);
+  lcd.clear();
+}
+
+// Prints a scrolling window of 16 characters with wrap-around.
+// After the message ends, a gap of spaces appears, then the message restarts.
 void printScrolled(const char* msg, int offset) {
   int len = strlen(msg);
+  int totalLen = len + SCROLL_GAP;
   for (int i = 0; i < LCD_COLS; i++) {
-    int idx = offset + i;
+    int idx = (offset + i) % totalLen;
     if (idx < len) {
       lcd.write(msg[idx]);
     } else {
