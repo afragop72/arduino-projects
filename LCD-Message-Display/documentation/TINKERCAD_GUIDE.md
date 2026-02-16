@@ -77,7 +77,7 @@ When the switch connects pin 10 to 5V (HIGH), the system runs. When it connects 
 
 The backlight connects directly to 5V (through a resistor) so it is always on.
 
-### LED Chase Lights (3 LEDs)
+### LED Bounce Lights (3 LEDs)
 
 Each LED connects through a 220Ω resistor to its Arduino pin:
 
@@ -155,8 +155,11 @@ void loop() {
   lcd.setCursor(0, 1);
   printScrolled(line2, scrollPos);
 
+  int bounceLen = (NUM_LEDS - 1) * 2;
+  int bouncePos = scrollPos % bounceLen;
+  int activeLed = (bouncePos < NUM_LEDS) ? bouncePos : bounceLen - bouncePos;
   for (int i = 0; i < NUM_LEDS; i++) {
-    digitalWrite(LED_PINS[i], (i == scrollPos % NUM_LEDS) ? HIGH : LOW);
+    digitalWrite(LED_PINS[i], (i == activeLed) ? HIGH : LOW);
   }
 
   scrollPos++;
@@ -179,8 +182,8 @@ void printScrolled(const char* msg, int offset) {
 1. **Click** "Start Simulation" (green button)
 2. **Flip the slideswitch** to the ON position (toward 5V)
 3. **Adjust the contrast pot** — turn it until text is clearly visible on the LCD
-4. **Adjust the scroll speed pot** — turn it to speed up or slow down the scrolling text and LED chase
-5. **Observe the LEDs** — they should chase in sequence (red → yellow → green) in sync with the scrolling text
+4. **Adjust the scroll speed pot** — turn it to speed up or slow down the scrolling text and LED bounce
+5. **Observe the LEDs** — they should bounce back and forth (red → yellow → green → yellow → red) in sync with the scrolling text
 6. **Verify** both messages scroll across the LCD
 7. **Flip the switch OFF** — LCD text disappears and LEDs turn off
 8. **Flip it back ON** — everything resumes from the beginning
@@ -190,7 +193,7 @@ void printScrolled(const char* msg, int offset) {
 - **Power switch**: Flip to ON to start the system, OFF to stop (LCD clears, LEDs off).
 - **Contrast pot**: Turning it changes text visibility (too light ↔ clear ↔ too dark). Find the sweet spot.
 - **Scroll speed pot**: Turning it makes the text and LEDs scroll faster (100ms delay) or slower (500ms delay).
-- **LEDs**: One LED lights up at a time, cycling through all three with each scroll step. The chase pattern repeats continuously.
+- **LEDs**: One LED lights up at a time, bouncing back and forth (1-2-3-2-1) with each scroll step. The Knight Rider pattern repeats continuously.
 - **Backlight**: Always on (connected directly to 5V).
 
 ## Troubleshooting in TinkerCad
@@ -266,9 +269,9 @@ void printScrolled(const char* msg, int offset) {
 | Pin 4 | LCD Pin 12 (DB5) | Data bit 5 |
 | Pin 3 | LCD Pin 13 (DB6) | Data bit 6 |
 | Pin 2 | LCD Pin 14 (DB7) | Data bit 7 |
-| Pin 7 | LED 1 via 220Ω | Chase LED (red) |
-| Pin 8 | LED 2 via 220Ω | Chase LED (yellow) |
-| Pin 9 | LED 3 via 220Ω | Chase LED (green) |
+| Pin 7 | LED 1 via 220Ω | Bounce LED (red) |
+| Pin 8 | LED 2 via 220Ω | Bounce LED (yellow) |
+| Pin 9 | LED 3 via 220Ω | Bounce LED (green) |
 | Pin 10 | Slideswitch common | Power ON/OFF |
 | A1 | Pot 2 wiper | Scroll speed reading |
 | — | Pot 1 wiper → LCD Pin 3 | Contrast (hardware) |

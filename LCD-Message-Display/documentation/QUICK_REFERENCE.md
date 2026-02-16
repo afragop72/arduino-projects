@@ -46,7 +46,7 @@ GND → VCC → V/O → RS → RW → E → DB0 → DB1 → DB2 → DB3 → DB4 
 | Common (middle)| Arduino Pin 10 |
 | Terminal 2     | GND         |
 
-## LED Chase Connections
+## LED Bounce Connections
 
 | LED            | Arduino Pin | Resistor | Cathode |
 | -------------- | ----------- | -------- | ------- |
@@ -96,7 +96,7 @@ GND → VCC → V/O → RS → RW → E → DB0 → DB1 → DB2 → DB3 → DB4 
 - LED (left) → 220Ω resistor → 5V
 - LED (right) → Arduino GND
 
-**8. Chase LEDs:**
+**8. Bounce LEDs:**
 
 - Pin 7 → 220Ω → Red LED → GND
 - Pin 8 → 220Ω → Yellow LED → GND
@@ -112,7 +112,7 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 const int POWER_SWITCH = 10;          // ON/OFF switch
 const int SPEED_POT = A1;            // Scroll speed pot input
-const int LED_PINS[] = {7, 8, 9};    // Chase LEDs
+const int LED_PINS[] = {7, 8, 9};    // Bounce LEDs
 ```
 
 ## Important Notes

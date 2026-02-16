@@ -111,7 +111,7 @@ The Arduino reads the voltage on A1 (0-1023) and maps it to a scroll delay (100m
 
 When the switch connects pin 10 to 5V, the system runs. When it connects to GND, the LCD clears and LEDs turn off.
 
-### LED Chase Lights
+### LED Bounce Lights
 
 | LED            | Arduino Pin | Resistor | Cathode |
 | -------------- | ----------- | -------- | ------- |

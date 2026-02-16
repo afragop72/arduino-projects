@@ -1,6 +1,6 @@
 # LCD Name Display
 
-Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with a power switch, adjustable contrast, adjustable scroll speed, and LED chase lights.
+Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with a power switch, adjustable contrast, adjustable scroll speed, and LED bounce lights.
 
 ![Arduino](https://img.shields.io/badge/Arduino-Uno%20R3-00979D?logo=arduino&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Ready-success)
@@ -8,7 +8,7 @@ Display your name on a 16x2 HD44780 LCD using Arduino Uno R3, with a power switc
 
 ## Overview
 
-This project demonstrates how to interface a 16x2 character LCD (HD44780 controller) with an Arduino Uno R3 to display scrolling custom text. It includes a power switch, two potentiometers (contrast and scroll speed), and three LEDs that chase in sequence with the scrolling text.
+This project demonstrates how to interface a 16x2 character LCD (HD44780 controller) with an Arduino Uno R3 to display scrolling custom text. It includes a power switch, two potentiometers (contrast and scroll speed), and three LEDs that bounce back and forth (Knight Rider style) with the scrolling text.
 
 **Features:**
 - Slideswitch to power the system ON/OFF
@@ -16,7 +16,7 @@ This project demonstrates how to interface a 16x2 character LCD (HD44780 control
 - 4-bit mode connection (saves Arduino pins)
 - Potentiometer for contrast control (hardware)
 - Potentiometer for scroll speed control (software)
-- 3 LEDs that cycle in a chase pattern with each scroll step
+- 3 LEDs that bounce back and forth (Knight Rider style) with each scroll step
 - Includes TinkerCad simulation guide
 - Complete wiring diagrams and troubleshooting
 
@@ -97,8 +97,8 @@ Each LED connects through a 220Ω resistor:
 
 - **Power switch**: Flip to ON to start, OFF to stop
 - **Contrast pot**: Turn until text is clearly visible on the LCD
-- **Scroll speed pot**: Turn to speed up or slow down scrolling and LED chase
-- **LEDs**: They chase automatically in sync with scrolling text
+- **Scroll speed pot**: Turn to speed up or slow down scrolling and LED bounce
+- **LEDs**: They bounce automatically in sync with scrolling text (1-2-3-2-1)
 
 ## Documentation
 
@@ -164,8 +164,11 @@ void loop() {
   lcd.setCursor(0, 1);
   printScrolled(line2, scrollPos);
 
+  int bounceLen = (NUM_LEDS - 1) * 2;
+  int bouncePos = scrollPos % bounceLen;
+  int activeLed = (bouncePos < NUM_LEDS) ? bouncePos : bounceLen - bouncePos;
   for (int i = 0; i < NUM_LEDS; i++) {
-    digitalWrite(LED_PINS[i], (i == scrollPos % NUM_LEDS) ? HIGH : LOW);
+    digitalWrite(LED_PINS[i], (i == activeLed) ? HIGH : LOW);
   }
 
   scrollPos++;
@@ -232,7 +235,7 @@ LCD_Name_Display/
 ## Next Steps
 
 Once you've got this working, try:
-- Change the LED chase to a bounce pattern (1-2-3-2-1 instead of 1-2-3-1-2-3)
+- Add wrap-around scrolling (text reappears from the right)
 - Display sensor data (temperature, distance, etc.)
 - Add button input to change the message
 - Create a simple menu system

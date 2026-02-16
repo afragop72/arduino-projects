@@ -14,7 +14,7 @@
  *   - LCD Pin 15 (A) → 220Ω → 5V              (always on)
  *
  * LEDs:
- *   - 3 LEDs on pins 7, 8, 9 cycle in a chase pattern with each scroll step
+ *   - 3 LEDs on pins 7, 8, 9 bounce in a Knight Rider pattern with each scroll step
  */
 
 #include <LiquidCrystal.h>
@@ -96,9 +96,12 @@ void loop() {
   lcd.setCursor(0, 1);
   printScrolled(line2, scrollPos);
 
-  // LED chase: light one LED per scroll step
+  // LED bounce: Knight Rider pattern (0-1-2-1-0-1-2-1...)
+  int bounceLen = (NUM_LEDS - 1) * 2;  // 4 for 3 LEDs
+  int bouncePos = scrollPos % bounceLen;
+  int activeLed = (bouncePos < NUM_LEDS) ? bouncePos : bounceLen - bouncePos;
   for (int i = 0; i < NUM_LEDS; i++) {
-    digitalWrite(LED_PINS[i], (i == scrollPos % NUM_LEDS) ? HIGH : LOW);
+    digitalWrite(LED_PINS[i], (i == activeLed) ? HIGH : LOW);
   }
 
   scrollPos++;

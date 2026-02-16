@@ -8,7 +8,7 @@ A collection of Arduino projects for learning electronics and embedded programmi
 
 | Project | Description | Board | Difficulty |
 | ------- | ----------- | ----- | ---------- |
-| [LCD Message Display](LCD-Message-Display/) | Scrolling text on a 16x2 HD44780 LCD with power switch, adjustable contrast, scroll speed control, and LED chase lights | Uno R3 | Beginner |
+| [LCD Message Display](LCD-Message-Display/) | Scrolling text on a 16x2 HD44780 LCD with power switch, adjustable contrast, scroll speed control, and LED bounce lights | Uno R3 | Beginner |
 
 ## Getting Started
 
